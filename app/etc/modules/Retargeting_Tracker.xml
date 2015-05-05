@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @category    Retargeting
+ * @package     Retargeting_Tracker
+ * @author      Retargeting <info@retargeting.biz>
+ * @copyright   Copyright (c) Retargeting
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+*/
+-->
+<config>
+    <modules>
+        <Retargeting_Tracker>
+            <active>true</active>
+            <codePool>community</codePool>
+        </Retargeting_Tracker>
+    </modules>
+</config>

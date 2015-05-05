@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <default>
+
+        <reference name="head">
+            <block type="retargeting_tracker/embed" name="retargeting.embed" template="retargeting_tracker/embed.phtml"/>
+        </reference>
+
+        <reference name="head">
+            <block type="retargeting_tracker/triggers" name="retargeting.triggers" template="retargeting_tracker/triggers.phtml"/>
+        </reference>
+
+    </default>
+</layout>
