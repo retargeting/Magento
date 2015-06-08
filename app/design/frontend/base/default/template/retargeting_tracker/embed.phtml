@@ -8,9 +8,18 @@
  */
 ?>
 <script type="text/javascript">
+	<?php $ra_key = Mage::getStoreConfig('retargetingtracker_options/domain/domain_api_key'); ?>
+	<?php if ($ra_key && $ra_key != '') : ?>
+	(function(){
+	var ra_key = "<?php echo $ra_key; ?>";
+	var ra = document.createElement("script"); ra.type ="text/javascript"; ra.async = true; ra.src = ("https:" ==
+	document.location.protocol ? "https://" : "http://") + "retargeting-data.eu/rajs/" + ra_key + ".js";
+	var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ra,s);})();
+	<?php else : ?>
 	(function(){
 	var ra = document.createElement("script"); ra.type ="text/javascript"; ra.async = true; ra.src = ("https:" ==
 	document.location.protocol ? "https://" : "http://") + "retargeting-data.eu/" +
 	document.location.hostname.replace("www.","") + "/ra.js"; var s =
 	document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ra,s);})();
+	<?php endif; ?>
 </script>

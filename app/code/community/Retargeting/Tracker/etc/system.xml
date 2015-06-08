@@ -40,6 +40,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<a href="https://retargeting.biz/admin?action=api_redirect&token=5ac66ac466f3e1ec5e6fe5a040356997">Click here</a> to get your Domain API Key]]></comment>
                         </domain_api_key>
                     </fields>
                 </domain>
@@ -58,13 +59,23 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<a href="https://retargeting.biz/admin?action=api_redirect&token=028e36488ab8dd68eaac58e07ef8f9bf">Click here</a> to get your Discounts API Key]]></comment>
                         </discount_api_key>
                     </fields>
                 </discounts>
+                <information translate="label">
+                    <label>Specific URLs</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[<strong>Discounts API URL:</strong> /retargetingtracker/discounts/addDiscountCode<br><strong>Products Feed URL:</strong> /retargetingtracker/products]]></comment>
+                </information>
                 <more translate="label">
                     <label>More</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>2</sort_order>
+                    <sort_order>3</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
