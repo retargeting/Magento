@@ -158,7 +158,7 @@
 	_ra.sendProductInfo = {
 		"id": "<?php echo $_product->getId(); ?>",
 		"name": "<?php echo htmlspecialchars($_product->getName()); ?>",
-		"url": "<?php echo htmlspecialchars($_productUrl); ?>",
+		"url": window.location.origin + window.location.pathname,
 	  	"img": "<?php echo htmlspecialchars( Mage::helper('catalog/image')->init($_product, 'image')->resize(500) ); ?>", 
 	  	"price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
 		"promo": <?php echo ( Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0 ); ?>,
@@ -227,7 +227,7 @@
 	_ra.sendProductInfo = {
 		"id": "<?php echo $_product->getId(); ?>",
 		"name": "<?php echo htmlspecialchars($_product->getName()); ?>",
-		"url": "<?php echo htmlspecialchars($_productUrl); ?>", 
+		"url": window.location.origin + window.location.pathname, 
 	  	"img": "<?php echo htmlspecialchars( Mage::helper('catalog/image')->init($_product, 'image')->resize(500) ); ?>", 
 	  	"price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
 		"promo": <?php echo ( Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0 ); ?>,
@@ -688,7 +688,7 @@
 	_ra.sendProductInfo = {
 		"id": "<?php echo $_product->getId(); ?>",
 		"name": "<?php echo htmlspecialchars($_product->getName()); ?>",
-		"url": "<?php echo htmlspecialchars($_productUrl); ?>", 
+		"url": window.location.origin + window.location.pathname, 
 	  	"img": "<?php echo htmlspecialchars( Mage::helper('catalog/image')->init($_product, 'image')->resize(500) ); ?>", 
 	  	"price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
 		"promo": <?php echo ( Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0 ); ?>,
