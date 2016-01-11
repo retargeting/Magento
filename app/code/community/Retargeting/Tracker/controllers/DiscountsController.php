@@ -19,7 +19,7 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
 
         if ( isset($params['key']) && isset($params['value']) && isset($params['type']) && isset($params['count']) ) {
 
-            $userApiKey = Mage::getStoreConfig('retargetingtracker_options/discounts/discount_api_key');
+            $userApiKey = Mage::getStoreConfig('retargetingtracker_options/token/token');
 
             if ( $userApiKey != '' && $params['key'] == $userApiKey && $params['value'] != "" && $params['type'] != "" && $params['count'] != "" ) {
                 $name = 'RA-' . htmlspecialchars($params['type']) . '-' . htmlspecialchars($params['value']);

@@ -7,6 +7,8 @@
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+require_once(Mage::getBaseDir('lib') . '/Retargeting/Retargeting_REST_API_Client.php');
+
 class Retargeting_Tracker_Model_Observer
 {
     public function TrackSetEmail($observer)
@@ -139,6 +141,9 @@ class Retargeting_Tracker_Model_Observer
 
     public function TrackSaveOrder($observer)
     {
+        $apiKey = Mage::getStoreConfig('retargetingtracker_options/domain/domain_api_key');
+        $token = Mage::getStoreConfig('retargetingtracker_options/token/token');
+
         $magentoVersion = Mage::getVersion();
         if($magentoVersion > "1.4.2.0") {
 
@@ -197,6 +202,14 @@ class Retargeting_Tracker_Model_Observer
                 "total" => $order->getGrandTotal(),
                 "products" => "[".implode(",", $products)."]",
             );
+        
+            if($apiKey && $apiKey != "" && $token && $token != "") {
+                $retargetingClient = new Retargeting_REST_API_Client($apiKey,$token);
+                $retargetingClient->setResponseFormat("json");
+                $retargetingClient->setDecoding(false);
+                $response = $retargetingClient->order->save($info, $products);
+            }
+            
             Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
         } else {
            
@@ -239,6 +252,13 @@ class Retargeting_Tracker_Model_Observer
                 "total" => $order->getGrandTotal(),
                 "products" => "[".implode(",", $products)."]",
             );
+            
+            if($apiKey && $apiKey != "" && $token && $token != "") {
+                $retargetingClient = new Retargeting_REST_API_Client($apiKey,$token);
+                $retargetingClient->setResponseFormat("json");
+                $retargetingClient->setDecoding(false);
+                $response = $retargetingClient->order->save($info, $products);
+            }
 
             Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
         }

@@ -16,7 +16,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
 		$params = $this->getRequest()->getParams();
 
-        if ( isset($params['key']) && $params['key'] != '' && $params['key'] == Mage::getStoreConfig('retargetingtracker_options/discounts/discount_api_key') ) {
+        if ( isset($params['key']) && $params['key'] != '' && $params['key'] == Mage::getStoreConfig('retargetingtracker_options/token/token') ) {
 
 			$collection = Mage::getResourceModel('catalog/product_collection');
 			foreach($collection as $product) {
