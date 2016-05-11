@@ -100,14 +100,32 @@
                             <!--<comment><![CDATA[likeFacebook function]]></comment>-->
                         </facebook>
                         <css translate="label">
-                            <label>Custom CSS</label>
+                            <label>Main image CSS Class</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment><![CDATA[Insert your main product image CSS class]]></comment>
+                            <comment><![CDATA[Insert your main product image CSS Class]]></comment>
                         </css>
+                        <cartid translate="label">
+                            <label>Add To Cart Button ID or Class</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Add To Cart Button ID or Class]]></comment>
+                        </cartid>
+                        <pricelabelid translate="label">
+                            <label>Add Price Label ID or Class</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Add Price Label ID or Class]]></comment>
+                        </pricelabelid>
                     </fields>
                 </more>
 
