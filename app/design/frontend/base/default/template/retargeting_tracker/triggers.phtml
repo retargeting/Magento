@@ -246,7 +246,10 @@
 	  	"img": "<?php echo htmlspecialchars( Mage::helper('catalog/image')->init($_product, 'image')->resize(500) ); ?>", 
 	  	"price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
 		"promo": <?php echo ( Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0 ); ?>,
-		"stock": <?php echo $_product->getIsInStock() ?>,
+		"inventory": {
+			"variations": false,
+			"stock": <?php echo $_product->getIsInStock() ?>
+		},
 		"brand": false,
 		"category": <?php echo $_category; ?>,
 		"callback_function": function() {
@@ -713,7 +716,10 @@
 	  	"img": "<?php echo htmlspecialchars( Mage::helper('catalog/image')->init($_product, 'image')->resize(500) ); ?>", 
 	  	"price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
 		"promo": <?php echo ( Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0 ); ?>,
-		"stock": <?php echo $_product->getIsInStock() ?>,
+		"inventory": {
+			"variations": false,
+			"stock": <?php echo $_product->getIsInStock() ?>
+		},
 		"brand": false,
 		"category": <?php echo $_category; ?>,
 		"callback_function": function() {
