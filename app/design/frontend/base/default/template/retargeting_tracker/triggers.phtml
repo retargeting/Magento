@@ -255,7 +255,7 @@
 		"callback_function": function() {
 			_ra.addToCartInfo = {
 				"product_id": "<?php echo $info['product_id']; ?>",
-				"quantity": <?php echo $_product->getIsInStock() ?>
+				"quantity": <?php echo $_product->getIsInStock() ?>,
 				"variation": <?php echo $info['variation']; ?>
 			};
 			if(typeof _ra.addToCart !== "undefined") _ra.addToCart(_ra.addToCartInfo.product_id, _ra.addToCartInfo.variation);
@@ -271,7 +271,7 @@
 	var _ra = _ra || {};
 	_ra.addToCartInfo = {
 		"product_id": "<?php echo $info['product_id']; ?>",
-		"quantity": <?php echo $_product->getIsInStock() ?>
+		"quantity": 1,
 		"variation": <?php echo $info['variation']; ?>
 	};
 
