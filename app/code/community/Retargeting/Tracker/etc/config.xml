@@ -11,7 +11,7 @@
 <config>
     <modules>
         <Retargeting_Tracker>
-            <version>1.1.4</version>
+            <version>1.2.0</version>
         </Retargeting_Tracker>
     </modules>
     <global>
@@ -33,15 +33,6 @@
                 <class>Retargeting_Tracker_Helper</class>
             </retargeting_tracker>
         </helpers>
-        <!--
-            <resources>
-                <retargeting_tracker_setup>
-                    <setup>
-                        <module>Retargeting_Tracker</module>
-                    </setup>
-                </retargeting_tracker_setup>
-            </resources>
-            -->
         <events>
             <customer_login>
                 <observers>
@@ -98,33 +89,6 @@
             </updates>
         </layout>
     </frontend>
-    <!--
-      <admin>
-          <routers>
-              <adminhtml>
-                  <args>
-                      <modules>
-                          <Retargeting_Tracker before="Mage_Adminhtml">Retargeting_Tracker_Adminhtml</Retargeting_Tracker>
-                      </modules>
-                  </args>
-              </adminhtml>
-          </routers>
-      </admin>
-      -->
-    <!--
-      <crontab>
-          <jobs>
-              <retargeting_tracker_cron>
-                  <schedule>
-                      <cron_expr>0,45 * * * *</cron_expr>
-                  </schedule>
-                  <run>
-                      <model>retargeting_tracker/observer::methodName</model>
-                  </run>
-              </retargeting_tracker_cron>
-          </jobs>
-      </crontab>
-      -->
     <adminhtml>
         <acl>
             <resources>

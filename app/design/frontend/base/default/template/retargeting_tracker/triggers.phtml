@@ -74,11 +74,11 @@
 			while ( $breadcrumbCategory->getLevel() > 2 ) {
 				$breadcrumbCategory = Mage::getModel('catalog/category')->load($breadcrumbCategory->getParentId());
 
-				$_categoryBreadcrumb[] = '{
+				$_categoryBreadcrumb[] = '[{
 					"id": "'.$breadcrumbCategory->getId().'",
 					"name": "'.htmlspecialchars($breadcrumbCategory->getName()).'",
 					"parent": '.( $breadcrumbCategory->getLevel() > 2 ? '"'.$breadcrumbCategory->getParentId().'"' : 'false' ).'
-				}';
+				}]';
 			}
 			$_categoryBreadcrumb = '['.implode(', ', $_categoryBreadcrumb).']';
 		}
@@ -89,7 +89,7 @@
 		"id": "<?php echo $_category->getId(); ?>",
 		"name": "<?php echo htmlspecialchars($_category->getName()); ?>",
 		"parent": <?php echo $_categoryParent; ?>,
-		"category_breadcrumb": <?php echo $_categoryBreadcrumb; ?>
+		"breadcrumb": <?php echo $_categoryBreadcrumb; ?>
 	};
 	
 	if (_ra.ready !== undefined) {
@@ -139,7 +139,6 @@
 				$breadcrumbCategory = $_category;
 				while ( $breadcrumbCategory->getLevel() > 2 ) {
 					$breadcrumbCategory = Mage::getModel('catalog/category')->load($breadcrumbCategory->getParentId());
-
 					$_categoryBreadcrumb[] = '{
 						"id": "'.$breadcrumbCategory->getId().'",
 						"name": "'.htmlspecialchars($breadcrumbCategory->getName()).'",
@@ -148,9 +147,18 @@
 				}
 				$_categoryBreadcrumb = '['.implode(', ', $_categoryBreadcrumb).']';
 			}
-			$_category = '{"id": "'.$_category->getId().'", "name": "'.htmlspecialchars($_category->getName()).'", "parent": '.$_categoryParent.'}';
+			$_category = '[{
+				"id": "'.$_category->getId().'",
+				"name": "'.htmlspecialchars($_category->getName()).'",
+				"parent": '.$_categoryParent.',
+				"breadcrumb" : '.$_categoryBreadcrumb.
+				'}]';
 		} else {
-			$_category = '{"id": "-1", "name": "no category", "parent": false}';
+			$_category = '[{
+				"id": "-1",
+				"name": "no category",
+				"parent": false
+			}]';
 		}
 	?>
 
@@ -162,10 +170,12 @@
 	  	"img": "<?php echo htmlspecialchars( Mage::helper('catalog/image')->init($_product, 'image')->resize(500) ); ?>", 
 	  	"price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
 		"promo": <?php echo ( Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0 ); ?>,
-		"stock": <?php echo $_product->getIsInStock() ?>,
+		"inventory": {
+			"variations": false,
+			"stock": <?php echo $_product->getIsInStock() ?>
+		},
 		"brand": false,
-		"category": <?php echo $_category; ?>,
-		"category_breadcrumb": <?php echo $_categoryBreadcrumb; ?>
+		"category": <?php echo $_category; ?>
 	};
 
 	if (_ra.ready !== undefined) {
@@ -217,9 +227,14 @@
 				}
 				$_categoryBreadcrumb = '['.implode(', ', $_categoryBreadcrumb).']';
 			}
-			$_category = '{"id": "'.$_category->getId().'", "name": "'.htmlspecialchars($_category->getName()).'", "parent": '.$_categoryParent.'}';
+			$_category = '[{
+				"id": "'.$_category->getId().'",
+				"name": "'.htmlspecialchars($_category->getName()).'",
+				"parent": '.$_categoryParent.',
+				"breadcrumb" : '.$_categoryBreadcrumb.
+				'}]';
 		} else {
-			$_category = '{"id": "-1", "name": "no category", "parent": false}';
+			$_category = '[{"id": "-1", "name": "no category", "parent": false}]';
 		}
 	?>
 
@@ -231,13 +246,16 @@
 	  	"img": "<?php echo htmlspecialchars( Mage::helper('catalog/image')->init($_product, 'image')->resize(500) ); ?>", 
 	  	"price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
 		"promo": <?php echo ( Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0 ); ?>,
-		"stock": <?php echo $_product->getIsInStock() ?>,
+		"inventory": {
+			"variations": false,
+			"stock": <?php echo $_product->getIsInStock() ?>
+		},
 		"brand": false,
 		"category": <?php echo $_category; ?>,
-		"category_breadcrumb": <?php echo $_categoryBreadcrumb; ?>,
 		"callback_function": function() {
 			_ra.addToCartInfo = {
 				"product_id": "<?php echo $info['product_id']; ?>",
+				"quantity": <?php echo $_product->getIsInStock() ?>,
 				"variation": <?php echo $info['variation']; ?>
 			};
 			if(typeof _ra.addToCart !== "undefined") _ra.addToCart(_ra.addToCartInfo.product_id, _ra.addToCartInfo.variation);
@@ -253,6 +271,7 @@
 	var _ra = _ra || {};
 	_ra.addToCartInfo = {
 		"product_id": "<?php echo $info['product_id']; ?>",
+		"quantity": 1,
 		"variation": <?php echo $info['variation']; ?>
 	};
 
@@ -678,9 +697,14 @@
 				}
 				$_categoryBreadcrumb = '['.implode(', ', $_categoryBreadcrumb).']';
 			}
-			$_category = '{"id": "'.$_category->getId().'", "name": "'.htmlspecialchars($_category->getName()).'", "parent": '.$_categoryParent.'}';
+			$_category = '[{
+				"id": "'.$_category->getId().'",
+				"name": "'.htmlspecialchars($_category->getName()).'",
+				"parent": '.$_categoryParent.',
+				"breadcrumb" : '.$_categoryBreadcrumb.
+				'}]';
 		} else {
-			$_category = '{"id": "-1", "name": "no category", "parent": false}';
+			$_category = '[{"id": "-1", "name": "no category", "parent": false}]';
 		}
 	?>
 
@@ -692,10 +716,12 @@
 	  	"img": "<?php echo htmlspecialchars( Mage::helper('catalog/image')->init($_product, 'image')->resize(500) ); ?>", 
 	  	"price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
 		"promo": <?php echo ( Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0 ); ?>,
-		"stock": <?php echo $_product->getIsInStock() ?>,
+		"inventory": {
+			"variations": false,
+			"stock": <?php echo $_product->getIsInStock() ?>
+		},
 		"brand": false,
 		"category": <?php echo $_category; ?>,
-		"category_breadcrumb": <?php echo $_categoryBreadcrumb; ?>,
 		"callback_function": function() {
 			_ra.addToWishlistInfo = {
 				"product_id": "<?php echo $info['product_id']; ?>"
