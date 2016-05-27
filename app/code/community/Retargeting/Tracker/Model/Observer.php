@@ -87,7 +87,7 @@ class Retargeting_Tracker_Model_Observer
             }
         }
 
-        if(count($optionsCode) > 0) $options = '{ "code": "'.implode('-', $optionsCode).'", "details": {'.implode(', ', $optionsDetails).'} }';
+        if(count($optionsCode) > 0) $options = '{ "code": "'.implode('-', $optionsCode).'", "stock":1, "details": {'.implode(', ', $optionsDetails).'} }';
         else $options = "false";
 
         $info = array(
