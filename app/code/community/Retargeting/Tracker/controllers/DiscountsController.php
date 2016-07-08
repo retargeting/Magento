@@ -55,7 +55,11 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
         if ( $name != null && ( $type == "fixed value" || $type == "free shipping" || $type == "percentage" ) )
         {
             $rule = Mage::getModel('salesrule/rule');
-            $customer_groups = array(0, 1, 2, 3);
+            $customerGroupColl = Mage::getModel('customer/group')->getCollection();
+            $customer_groups = [];
+            foreach($customerGroupColl as $type) {
+                $customer_groups[] = $type->getCustomerGroupId();
+            }
 
             // discount name and init
             $rule->setName($name)
