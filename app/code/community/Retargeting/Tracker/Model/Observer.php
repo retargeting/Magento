@@ -71,7 +71,7 @@ class Retargeting_Tracker_Model_Observer
                 }
             }
         } else {
-            $itemOptions = $helper->getOptions($event);
+            $itemOptions = $helper->getOptions($quoteItem);
             if ( count($itemOptions) > 0 ) {
                 foreach ($itemOptions as $itemOption) {
                     $_optCode = str_replace(' ', '', $itemOption['value']);
