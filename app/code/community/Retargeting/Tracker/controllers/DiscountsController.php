@@ -24,10 +24,10 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
             if ( $userApiKey != '' && $params['key'] == $userApiKey && $params['value'] != "" && $params['type'] != "" && $params['count'] != "" ) {
                 $name = 'RA-' . htmlspecialchars($params['type']) . '-' . htmlspecialchars($params['value']);
                 $discount = htmlspecialchars($params['value']);
-                $type = htmlspecialchars($params['type']);
+                $raDiscountType = htmlspecialchars($params['type']);
                 $count = htmlspecialchars($params['count']);
 
-                echo $this->generateRule($name, $discount, $type, $count);
+                echo $this->generateRule($name, $discount, $raDiscountType, $count);
             } else {
                 echo json_encode(array(
                     "status" => false,
@@ -43,23 +43,34 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
         }
     }
 
-    private function generateRule($name = null, $discount = 0, $type = 0, $count)
+    private function generateRule($name = null, $discount = 0, $raDiscountType = 0, $count)
     {
         $availability = 100;
         $conditionAmount = 0;
-        
-        if ($type == 0) $type = "fixed value";
-        if ($type == 1) $type = "percentage";
-        if ($type == 2) $type = "free shipping";
 
-        if ( $name != null && ( $type == "fixed value" || $type == "free shipping" || $type == "percentage" ) )
+        if ($raDiscountType == 0) $raDiscountType = "fixed value";
+        if ($raDiscountType == 1) $raDiscountType = "percentage";
+        if ($raDiscountType == 2) $raDiscountType = "free shipping";
+
+        if ( $name != null && ( $raDiscountType == "fixed value" || $raDiscountType == "free shipping" || $raDiscountType == "percentage" ) )
         {
+
             $rule = Mage::getModel('salesrule/rule');
+
             $customerGroupColl = Mage::getModel('customer/group')->getCollection();
-            $customer_groups = [];
-            foreach($customerGroupColl as $type) {
-                $customer_groups[] = $type->getCustomerGroupId();
+            $customer_groups = array();
+            foreach($customerGroupColl as $group) {
+                $customer_groups[] = $group->getCustomerGroupId();
             }
+
+            //Get all Store Ids
+            $storeIds = array();
+            $allStores = Mage::app()->getStores();
+            foreach ($allStores as $storeId)
+            {
+                $storeIds[] = Mage::app()->getStore($storeId)->getId();
+            }
+
 
             // discount name and init
             $rule->setName($name)
@@ -78,7 +89,7 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
                 ->setSimpleFreeShipping('0')
                 ->setApplyToShipping('0')
                 ->setIsRss(0)
-                ->setWebsiteIds(array(1))
+                ->setWebsiteIds($storeIds)
                 ->setUseAutoGeneration(1);
 
             // discount code
@@ -90,7 +101,7 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
                 ->setDiscountStep(0);
 
             // discount type
-            switch ($type) {
+            switch ($raDiscountType) {
                 case 'percentage':
                     $rule->setSimpleAction('by_percent');
                     break;
@@ -100,38 +111,12 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
                         ->setDiscountAmount(0);
                     break;
                 case 'fixed value':
-                    $rule->setSimpleAction('by_fixed');
+                    $rule->setSimpleAction('cart_fixed');
                     break;
             }
 
             // discount availability
-            //$rule->setFromDate(date('Y-m-d'))->setToDate(Date('Y-m-d', strtotime("+".$availability." days")));
-
-            // discount conditions/actions
-            /*
-            if ($condition == "over") {
-                $item_found = Mage::getModel('salesrule/rule_condition_product_found')
-                    ->setType('salesrule/rule_condition_product_found')
-                    ->setValue(1) // 1 == FOUND
-                    ->setAggregator('all'); // match ALL conditions
-                $rule->getConditions()->addCondition($item_found);
-
-                $conditions = Mage::getModel('salesrule/rule_condition_product')
-                    ->setType('salesrule/rule_condition_product')
-                    ->setAttribute('quote_item_price')
-                    ->setOperator('>=')
-                    ->setValue($conditionAmount);
-                $item_found->addCondition($conditions);
-
-                $actions = Mage::getModel('salesrule/rule_condition_product')
-                    ->setType('salesrule/rule_condition_product')
-                    ->setAttribute('quote_item_price')
-                    ->setOperator('>=')
-                    ->setValue($conditionAmount);
-
-                $rule->getActions()->addCondition($actions);
-            }
-            */
+            $rule->setFromDate(date('Y-m-d'));
 
             $generator = Mage::getModel('salesrule/coupon_massgenerator');
 
@@ -153,7 +138,6 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
             // Set the generator, and coupon type so it's able to generate
             $rule->setCouponCodeGenerator($generator);
 
-
             // save discount
             $rule->save();
 
@@ -169,7 +153,7 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
 
             $rule->setCouponType(2);
             $rule->save();
-
+            header('Content-Type: application/json');
             return json_encode($codes);
         }
 

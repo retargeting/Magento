@@ -26,7 +26,7 @@
             <show_in_store>1</show_in_store>
             <groups>
                 <domain translate="label">
-                    <label>Domain</label>
+                    <label>Tracking API Key</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>
@@ -34,18 +34,18 @@
                     <show_in_store>1</show_in_store>
                     <fields>
                         <domain_api_key>
-                            <label>Domain API Key</label>
+                            <label>Tracking API Key</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment><![CDATA[<a href="https://retargeting.biz/admin?action=api_redirect&token=5ac66ac466f3e1ec5e6fe5a040356997">Click here</a> to get your Domain API Key]]></comment>
+                            <comment><![CDATA[<a href="https://retargeting.biz/admin?action=api_redirect&token=5ac66ac466f3e1ec5e6fe5a040356997">Click here</a> to get your Tracking API Key]]></comment>
                         </domain_api_key>
                     </fields>
                 </domain>
                 <token translate="label">
-                    <label>Token</label>
+                    <label>REST API Key</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>
@@ -53,13 +53,13 @@
                     <show_in_store>1</show_in_store>
                     <fields>
                         <token>
-                            <label>Token</label>
+                            <label>REST API Key</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment><![CDATA[<a href="https://retargeting.biz/admin?action=api_redirect&token=028e36488ab8dd68eaac58e07ef8f9bf">Click here</a> to get your token]]></comment>
+                            <comment><![CDATA[<a href="https://retargeting.biz/admin?action=api_redirect&token=5ac66ac466f3e1ec5e6fe5a040356997">Click here</a> to get your REST API Key]]></comment>
                         </token>
                     </fields>
                 </token>
