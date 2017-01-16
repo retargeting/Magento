@@ -203,8 +203,8 @@ class Retargeting_Tracker_Model_Observer
                 "products" => "[".implode(",", $products)."]",
             );
         
-            if($apiKey && $apiKey != "") {
-                $retargetingClient = new Retargeting_REST_API_Client($apiKey);
+            if($token && $token != "") {
+                $retargetingClient = new Retargeting_REST_API_Client($token);
                 $retargetingClient->setResponseFormat("json");
                 $retargetingClient->setDecoding(false);
                 $response = $retargetingClient->order->save($info, $products);
@@ -253,8 +253,8 @@ class Retargeting_Tracker_Model_Observer
                 "products" => "[".implode(",", $products)."]",
             );
             
-            if($apiKey && $apiKey != "") {
-                $retargetingClient = new Retargeting_REST_API_Client($apiKey);
+            if($token && $token != "") {
+                $retargetingClient = new Retargeting_REST_API_Client($token);
                 $retargetingClient->setResponseFormat("json");
                 $retargetingClient->setDecoding(false);
                 $response = $retargetingClient->order->save($info, $products);
