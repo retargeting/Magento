@@ -678,7 +678,7 @@
 
     <?php endif ?>
     <?php endif ?>
-    <?php                                                                                                         endif //magento version ?>
+    <?php endif //magento version ?>
 
 
     <?php
@@ -794,7 +794,7 @@
         }
     });
     //custom css
-    <?php                                                                                                         else : ?>
+    <?php else : ?>
     function _ra_triggerClickImage() {
         if (typeof _ra.clickImage !== "undefined") {
             _ra.clickImage("<?php echo $_product->getId(); ?>");
@@ -818,7 +818,7 @@
         }
     });
     <?php endif //customcss?>
-    <?php                                                                                                         endif //endif product ?>
+    <?php endif //endif product ?>
     <?php endif ?>
 
 
@@ -1019,7 +1019,7 @@
         }
     }
 
-    <?php                                                                                                         endif ?>
+    <?php endif ?>
 
 
     <?php // likeFacebook
@@ -1032,7 +1032,7 @@
             _ra.likeFacebook(<?php echo $_product->getId()?>);
         });
     }
-    <?php                                                                                                         endif; //end like facebook ?>
+    <?php endif; //end like facebook ?>
 
 </script>
 <?php
