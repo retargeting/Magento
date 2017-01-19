@@ -936,7 +936,7 @@
         "shipping": <?php echo $info['shipping']; ?>,
         "total": <?php echo $info['total']; ?>,
     };
-    _ra.saveOrderProducts = <?php echo $info['products']; ?>
+    _ra.saveOrderProducts = <?php echo json_encode($info['products']); ?>
 
     if (_ra.ready !== undefined) {
         if (typeof _ra.saveOrder !== "undefined") {
