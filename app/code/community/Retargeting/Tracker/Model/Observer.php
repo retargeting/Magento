@@ -185,12 +185,6 @@ class Retargeting_Tracker_Model_Observer
                         'price' => Mage::helper('tax')->getPrice($item, $item->getPrice()),
                         'variation_code' => $variationCode
                     );
-
-                // $products[] = '{
-                //     "id": "'. $item->getProductId() .'",
-                //     "quantity": '. $item->getQtyOrdered() .',
-                //     "price": ' . Mage::helper('tax')->getPrice($item, $item->getPrice()).',
-                //     "variation_code": ' . $variationCode . '}';
             }
 
             $info = array(
@@ -236,11 +230,12 @@ class Retargeting_Tracker_Model_Observer
 
                 $variationCode = "";
 
-                $products[] = '{
-                    "id": "'. $item->getProductId() .'",
-                    "quantity": '. $item->getQtyOrdered() .',
-                    "price": ' . Mage::helper('tax')->getPrice($item, $item->getPrice()).',
-                    "variation_code": false}';
+                $products[] = array(
+                        'id' => $item->getProductId(),
+                        'quantity' => $item->getQtyOrdered(),
+                        'price' => Mage::helper('tax')->getPrice($item, $item->getPrice()),
+                        'variation_code' => false
+                    );
             }
 
             $info = array(
@@ -257,11 +252,11 @@ class Retargeting_Tracker_Model_Observer
                 "discount_code" => $order->getCouponCode(),
                 "shipping" => $order->getShippingInclTax(),
                 "total" => $order->getGrandTotal(),
-                "products" => "[".implode(",", $products)."]",
+                "products" => json_encode($products)
             );
             
-            if($apiKey && $apiKey != "" && $token && $token != "") {
-                $retargetingClient = new Retargeting_REST_API_Client($apiKey,$token);
+            if($token && $token != "") {
+                $retargetingClient = new Retargeting_REST_API_Client($token);
                 $retargetingClient->setResponseFormat("json");
                 $retargetingClient->setDecoding(false);
                 $response = $retargetingClient->order->save($info, $products);
