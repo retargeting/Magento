@@ -34,6 +34,14 @@
             </retargeting_tracker>
         </helpers>
         <events>
+            <sales_quote_remove_item>
+                <observers>
+                    <retargeting_tracker>
+                        <class>Retargeting_Tracker_Model_Observer</class>
+                        <method>removeFromCart</method>
+                    </retargeting_tracker>
+                </observers>
+            </sales_quote_remove_item>
             <customer_login>
                 <observers>
                     <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
