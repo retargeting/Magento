@@ -188,6 +188,18 @@
     }
     <?php endif ?>
     <?php endif ?>
+    <?php /* === Remove From Cart === */ ?>
+        <?php if($info = Mage::getSingleton('core/session')->getTriggerRemoveFromCart()) : ?>
+                var _ra = _ra || {};
+                    _ra.removeFromCartInfo = <?php echo $info; ?>;
+                    if (_ra.ready !== undefined) {
+                        _ra.removeFromCart(_ra.removeFromCartInfo.product_id, _ra.removeFromCartInfo.quantity, _ra.removeFromCartInfo.variation);
+                    }
+             <?php Mage::getSingleton('core/session')->unsTriggerRemoveFromCart(); ?>
+        <?php endif; ?>
+    <?php /* === Remove From Cart === */ ?>
+
+
     <?php
     /*
         ----------------------- Trigger addToCart -----------------------
@@ -678,7 +690,7 @@
 
     <?php endif ?>
     <?php endif ?>
-    <?php                                                                                                         endif //magento version ?>
+    <?php endif //magento version ?>
 
 
     <?php
@@ -794,7 +806,7 @@
         }
     });
     //custom css
-    <?php                                                                                                         else : ?>
+    <?php else : ?>
     function _ra_triggerClickImage() {
         if (typeof _ra.clickImage !== "undefined") {
             _ra.clickImage("<?php echo $_product->getId(); ?>");
@@ -818,7 +830,7 @@
         }
     });
     <?php endif //customcss?>
-    <?php                                                                                                         endif //endif product ?>
+    <?php endif //endif product ?>
     <?php endif ?>
 
 
@@ -1019,7 +1031,7 @@
         }
     }
 
-    <?php                                                                                                         endif ?>
+    <?php endif ?>
 
 
     <?php // likeFacebook
@@ -1032,7 +1044,7 @@
             _ra.likeFacebook(<?php echo $_product->getId()?>);
         });
     }
-    <?php                                                                                                         endif; //end like facebook ?>
+    <?php endif; //end like facebook ?>
 
 </script>
 <?php

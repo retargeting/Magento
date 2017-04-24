@@ -38,6 +38,18 @@ class Retargeting_Tracker_Model_Observer
         Mage::getSingleton('core/session')->setTriggerSetEmail($info);
     }
 
+    public function removeFromCart($observer)
+    {
+        $item = $observer->getQuoteItem();
+
+        $info = array(
+                'product_id' => $item->getProductId(),
+                'quantity' => $item->getQty(),
+                'variation' => false
+            );
+        Mage::getSingleton('core/session')->setTriggerRemoveFromCart(json_encode($info));
+    }
+
     public function TrackAddToCart($observer)
     {
     
