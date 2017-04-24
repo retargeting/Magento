@@ -11,7 +11,7 @@
 <config>
     <modules>
         <Retargeting_Tracker>
-            <version>1.3.1</version>
+            <version>1.3.2</version>
         </Retargeting_Tracker>
     </modules>
     <global>
@@ -34,6 +34,14 @@
             </retargeting_tracker>
         </helpers>
         <events>
+            <sales_quote_remove_item>
+                <observers>
+                    <retargeting_tracker>
+                        <class>Retargeting_Tracker_Model_Observer</class>
+                        <method>removeFromCart</method>
+                    </retargeting_tracker>
+                </observers>
+            </sales_quote_remove_item>
             <customer_login>
                 <observers>
                     <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>

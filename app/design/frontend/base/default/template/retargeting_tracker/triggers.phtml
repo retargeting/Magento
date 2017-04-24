@@ -188,6 +188,18 @@
     }
     <?php endif ?>
     <?php endif ?>
+    <?php /* === Remove From Cart === */ ?>
+        <?php if($info = Mage::getSingleton('core/session')->getTriggerRemoveFromCart()) : ?>
+                var _ra = _ra || {};
+                    _ra.removeFromCartInfo = <?php echo $info; ?>;
+                    if (_ra.ready !== undefined) {
+                        _ra.removeFromCart(_ra.removeFromCartInfo.product_id, _ra.removeFromCartInfo.quantity, _ra.removeFromCartInfo.variation);
+                    }
+             <?php Mage::getSingleton('core/session')->unsTriggerRemoveFromCart(); ?>
+        <?php endif; ?>
+    <?php /* === Remove From Cart === */ ?>
+
+
     <?php
     /*
         ----------------------- Trigger addToCart -----------------------
@@ -936,7 +948,7 @@
         "shipping": <?php echo $info['shipping']; ?>,
         "total": <?php echo $info['total']; ?>,
     };
-    _ra.saveOrderProducts = <?php echo json_encode($info['products']); ?>
+    _ra.saveOrderProducts = <?php echo $info['products']; ?>
 
     if (_ra.ready !== undefined) {
         if (typeof _ra.saveOrder !== "undefined") {

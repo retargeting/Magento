@@ -38,6 +38,18 @@ class Retargeting_Tracker_Model_Observer
         Mage::getSingleton('core/session')->setTriggerSetEmail($info);
     }
 
+    public function removeFromCart($observer)
+    {
+        $item = $observer->getQuoteItem();
+
+        $info = array(
+                'product_id' => $item->getProductId(),
+                'quantity' => $item->getQty(),
+                'variation' => false
+            );
+        Mage::getSingleton('core/session')->setTriggerRemoveFromCart(json_encode($info));
+    }
+
     public function TrackAddToCart($observer)
     {
     
@@ -155,7 +167,6 @@ class Retargeting_Tracker_Model_Observer
             $quote = $observer->getEvent()->getQuote();
 
             $products = array();
-
             foreach ($order->getAllVisibleItems() as $item) {
                 $itemOptions = $item->getProductOptions();
                 $variationCode = "false";
@@ -169,7 +180,7 @@ class Retargeting_Tracker_Model_Observer
                     $optionsCode[] = $_optCode;
                 }
 
-                if ( count($itemOptions['options']) > 0 ) {
+                if ( isset($itemOptions['options']) && count($itemOptions['options']) > 0 ) {
                     foreach ($itemOptions['options'] as $itemOption) {
                         $_optCode = str_replace(' ', '', $itemOption['value']);
                         $_optCode = str_replace('-', '', $_optCode);
@@ -179,13 +190,13 @@ class Retargeting_Tracker_Model_Observer
                 }
 
                 $variationCode = count($optionsCode) > 0 ? '"'.implode('-', $optionsCode).'"' : "false";
-                    
-                 $products[] = array(
-                   "id" => $item->getProductId(),
-                   "quantity" => $item->getQtyOrdered(),
-                   "price" => Mage::helper('tax')->getPrice($item, $item->getPrice()),
-                   "variation_code" => $variationCode
-               );
+
+                $products[] = array(
+                        'id' => $item->getProductId(),
+                        'quantity' => $item->getQtyOrdered(),
+                        'price' => Mage::helper('tax')->getPrice($item, $item->getPrice()),
+                        'variation_code' => $variationCode
+                    );
             }
 
             $info = array(
@@ -202,22 +213,23 @@ class Retargeting_Tracker_Model_Observer
                 "discount_code" => $order->getCouponCode(),
                 "shipping" => $order->getShippingInclTax(),
                 "total" => $order->getGrandTotal(),
-                "products" => $products,
+                "products" => json_encode($products),
             );
 
             if($token && $token != "") {
                 $retargetingClient = new Retargeting_REST_API_Client($token);
                 $retargetingClient->setResponseFormat("json");
                 $retargetingClient->setDecoding(false);
-                $retargetingClient->order->save($info, $products);
+                $response = $retargetingClient->order->save($info, $products);
             }
+            
             Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
         } else {
            
            // Magento 1.4 compatibility
             $helper = Mage::helper('catalog/product');
 
-            $event = $observer->getEvent();  // Fetches the current event
+            $event = $observer->getEvent();  //Fetches the current event
             $order = $observer->getOrder();
             $billingAddress = $order->getBillingAddress();
             $quote = $observer->getEvent()->getQuote();
@@ -231,11 +243,11 @@ class Retargeting_Tracker_Model_Observer
                 $variationCode = "";
 
                 $products[] = array(
-                  "id" => $item->getProductId(),
-                  "quantity" => $item->getQtyOrdered(),
-                  "price" => Mage::helper('tax')->getPrice($item, $item->getPrice()),
-                  "variation_code" => $variationCode
-              );
+                        'id' => $item->getProductId(),
+                        'quantity' => $item->getQtyOrdered(),
+                        'price' => Mage::helper('tax')->getPrice($item, $item->getPrice()),
+                        'variation_code' => false
+                    );
             }
 
             $info = array(
@@ -252,14 +264,14 @@ class Retargeting_Tracker_Model_Observer
                 "discount_code" => $order->getCouponCode(),
                 "shipping" => $order->getShippingInclTax(),
                 "total" => $order->getGrandTotal(),
-                "products" => $products,
+                "products" => json_encode($products)
             );
             
             if($token && $token != "") {
                 $retargetingClient = new Retargeting_REST_API_Client($token);
                 $retargetingClient->setResponseFormat("json");
                 $retargetingClient->setDecoding(false);
-                $retargetingClient->order->save($info, $products);
+                $response = $retargetingClient->order->save($info, $products);
             }
 
             Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
