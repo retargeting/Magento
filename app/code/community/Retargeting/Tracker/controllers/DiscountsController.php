@@ -65,10 +65,10 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
 
             //Get all Store Ids
             $storeIds = array();
-            $allStores = Mage::app()->getStores();
-            foreach ($allStores as $storeId)
+            $allWebsites = Mage::app()->getWebsites();
+            foreach ($allWebsites as $websiteId => $website)
             {
-                $storeIds[] = Mage::app()->getStore($storeId)->getId();
+                $storeIds[] = $websiteId;
             }
 
 
