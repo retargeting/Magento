@@ -28,16 +28,17 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getStoreConfigFlag(self::XML_PATH_FACEBOOK, $store);
     }
 
- /*
- * Custom CSS CLASS
- *
- * @param mixed $store
- * @return bool
- * */
+     /*
+     * Custom CSS CLASS
+     *
+     * @param mixed $store
+     * @return bool
+     * */
     public function getCustomClass($store = null)
     {
         return Mage::getStoreConfig(self::XML_PATH_IMAGECLASS, $store);
     }
+
     /*
     *   Formats the price to have 2 decimals
     */
@@ -70,19 +71,24 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
                         $minimalPrice = $temp;
                         $cheapestAssociatedProduct = $associatedProduct;
                     }
+                    if ($associatedProduct->getPrice() >= $maxPrice) {
+                        $maxPrice = $associatedProduct->getPrice();
+                    }
                 }
                 $specialPrice = $minimalPrice;
+
                 if ($cheapestAssociatedProduct) {
                     $helper = Mage::helper('tax');
                     $specialPrice = $helper->getPrice($cheapestAssociatedProduct, $specialPrice, true);  
                 }
-                // Trebuie sa gasesc o metoda prin care sa iau cel mai mare base price al produsului
-                // de pus intr-un branch separat
+                // var_dump($maxPrice);
+
             default:
                 $price = 'pretdefault';
                 break;  
         }
         return $price;
     }
+
 
 }
