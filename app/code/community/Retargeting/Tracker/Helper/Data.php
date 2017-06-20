@@ -71,8 +71,8 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
                         $minimalPrice = $temp;
                         $cheapestAssociatedProduct = $associatedProduct;
                     }
-                    if ($associatedProduct->getPrice() >= $maxPrice) {
-                        $maxPrice = $associatedProduct->getPrice();
+                    if ($associatedProduct->getFinalPrice() >= $maxPrice) {
+                        $maxPrice = $associatedProduct->getFinalPrice();
                     }
                 }
                 $specialPrice = $minimalPrice;
