@@ -38,14 +38,6 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return Mage::getStoreConfig(self::XML_PATH_IMAGECLASS, $store);
     }
-
-    /*
-    *   Formats the price to have 2 decimals
-    */
-    protected function formatter($price)
-    {
-        return number_format($price, 2);
-    }
     
     /*
     *   TBD
@@ -53,41 +45,48 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
     public function preparePrice(Mage_Catalog_Model_Product $product)
     {
         $price = 0;
+        $helper = Mage::helper('tax');
         switch ($product->getTypeId()) {
             case Mage_Catalog_Model_Product_Type::TYPE_BUNDLE:
                 $bundlePrices = $product->getPriceModel();
+                $price = $bundlePrices->getTotalPrices($product, 'max', true);                
                 $specialPrice = $bundlePrices->getTotalPrices($product, 'min', true);
-                $maxPrice = $bundlePrices->getTotalPrices($product, 'max', true);
                 break;
             case Mage_Catalog_Model_Product_Type::TYPE_GROUPED:
-                $typeInstance = $product->getTypeInstance();
-                $associatedProducts = $typeInstance->setStoreFilter($product->getStore(),
-                    $product)->getAssociatedProducts($product);
-                $cheapestAssociatedProduct = null;
-                $minimalPrice = 0;
-                foreach ($associatedProducts as $associatedProduct) {
-                    $temp = $associatedProduct->getSpecialPrice();
-                    if ($minimalPrice === 0 || $minimalPrice > $temp) {
-                        $minimalPrice = $temp;
-                        $cheapestAssociatedProduct = $associatedProduct;
-                    }
-                    if ($associatedProduct->getFinalPrice() >= $maxPrice) {
-                        $maxPrice = $associatedProduct->getFinalPrice();
-                    }
-                }
-                $specialPrice = $minimalPrice;
+                $conf = Mage::getSingleton('catalog/config');
+                $tmp = Mage::getModel('catalog/product')
+                ->getCollection()
+                ->addAttributeToSelect(
+                    $conf->getProductAttributes()
+                )
+                ->addAttributeToFilter('entity_id', $product->getId())
+                ->setPage(1,1)
+                ->addFinalPrice()
+                ->addTaxPercents()
+                ->load()
+                ->getFirstItem();
 
-                if ($cheapestAssociatedProduct) {
-                    $helper = Mage::helper('tax');
-                    $specialPrice = $helper->getPrice($cheapestAssociatedProduct, $specialPrice, true);  
+                $price = $helper->getPrice($tmp, $tmp->getMaxPrice(), true);
+                $specialPrice = $helper->getPrice($tmp, $tmp->getMinimalPrice(), true);
+                if( $price == $specialPrice) {
+                  $specialPrice = 0;
                 }
-                // var_dump($maxPrice);
-
+                break;
             default:
-                $price = 'pretdefault';
-                break;  
+                $price = $helper->getPrice($product, $product->getPrice());
+                $specialPrice = $helper->getPrice($product, $product->getFinalPrice());
+                if( $price - $specialPrice > 0 ){
+                    $specialPrice = $helper->getPrice($product, $product->getFinalPrice());
+                } else {
+                    $specialPrice = 0;
+                }
+                break;
         }
-        return $price;
+        
+        return array(
+            'price' => $price,
+            'specialPrice' => $specialPrice
+        );
     }
 
 
