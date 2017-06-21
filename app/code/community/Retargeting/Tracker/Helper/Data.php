@@ -73,6 +73,15 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
                 }
                 break;
             default:
+            // $productCollection = Mage::getModel('catalog/product')->getCollection();
+            // $productCollection->addAttributeToSelect(array('name', 'price', 'special_price'));
+            // // Mage::getSingleton('catalog/product_status')->addVisibleFilterToCollection($productCollection);
+            // // Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($productCollection);
+            // foreach($productCollection as $product) {
+            //     // $products = Mage::getModel('catalog/product')->load($product->getId());
+            //     echo "<br>" . $product->getStockItem()->getIsInStock() . "</br>";
+            // }
+
                 $price = $helper->getPrice($product, $product->getPrice());
                 $specialPrice = $helper->getPrice($product, $product->getFinalPrice());
                 if( $price - $specialPrice > 0 ){
