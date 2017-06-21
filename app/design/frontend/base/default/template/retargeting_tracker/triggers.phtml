@@ -165,7 +165,6 @@
     }
     ?>
     <?php 
-        // gets product prices from Data.php -> preparePrice() method
         $productPrices = Mage::helper('retargeting_tracker')->preparePrice($_product);
     ?>
     var _ra = _ra || {};
@@ -869,19 +868,6 @@
     */
     ?>
     <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
-
-    // Trigger mouseOverPrice
-
-    <?php $_product = Mage::registry('current_product'); ?>
-    <?php if ($_product) : ?>
-    function _ra_triggerMouseOverPrice() {
-        if (typeof _ra.mouseOverPrice !== "undefined") {
-            _ra.mouseOverPrice("<?php echo $_product->getId(); ?>", {
-              "price": <?php echo $productPrices['price']; ?>,
-              "promo": <?php echo $productPrices['specialPrice']; ?>,
-            });
-        }
-    }
 
     _ra_helper_addLoadEvent(function () {
         if (document.getElementById("product-price-<?php echo $_product->getId(); ?>") !== null) {
