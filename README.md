@@ -12,7 +12,7 @@ When you have people in our online shop, if you see that someone's showing a lot
 
 With our personalized live triggers that's exactly what you'll do, just that you won't have to lift a finger.
 
-[read more about live triggers](https://retargeting.biz/live-triggers-marketing)
+[read more about live triggers](https://retargeting.biz/features#live)
 
 ## E-mail triggers & reminders
 
@@ -20,13 +20,13 @@ We all want to market someone when they're in a buying mood, but it's hard to ge
 
 Someone browsed the site, found interesting products but didn't press the buy button? We'll remind him about those cool products through a triggered email. And that's not all, we can do so much more with our personalized emails!
 
-[read more about email triggers](https://retargeting.biz/email-triggers-and-reminders)
+[read more about email triggers](https://retargeting.biz/features#email)
 
 ## SMS Triggers
 
 Nowadays, with everyone checking their phones every 5 minutes, you can't go wrong with this, you're 100% sure that they will see your message. What better way to remind someone that they forgot to finish order a couple of hours ago?
 
-[read more about sms triggers](https://retargeting.biz/sms-triggers)
+[read more about sms triggers](https://retargeting.biz/features#sms)
 
 ## Multitesting
 
