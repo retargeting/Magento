@@ -21,9 +21,9 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 'id' => $product->getId(),
                 'price' => (double)$product->getPrice(),
                 'promo' =>( $product->getPrice() - $product->getFinalPrice() > 0 ) ?  (double)$product->getFinalPrice() : 0,
-                'promo_price_end_date' => null, // de captat
+                'promo_price_end_date' => $product->getSpecialToDate(),
                 'inventory' => array(
-                    'variations' => false, // de captat
+                    'variations' => false, // nu am gasit o solutie finala
                     'stock' => (bool)$product->getStockItem()->getIsInStock()
                 ),
                 'user_groups' => false,

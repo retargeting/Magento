@@ -174,7 +174,7 @@
         "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
         "img": "<?php echo htmlspecialchars(Mage::helper('catalog/image')->init($_product, 'image')->resize(500)); ?>",
         "price": <?php echo $productPrices['price']; ?>,
-        "promo": <?php echo $productPrices['specialPrice']; ?>,
+        "promo": <?php echo $productPrices['promo']; ?>,
         "inventory": {
             "variations": false,
             "stock": <?php echo $_product->getIsInStock() ?>
@@ -919,7 +919,22 @@
     */
     ?>
     <?php if ($info = Mage::getSingleton('core/session')->getTriggerSaveOrder()) : ?>
-
+    <?php 
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+            //Get customer's date of birth. If date of birth doesn't exist or is not set => NULL;
+            // Comments to be deleted
+            $birthday = Mage::getSingleton('customer/session')->getCustomer()->getDob();
+            
+            if($birthday === NULL) {
+                $formattedBirthday = '';
+            } else {
+                $formattedBirthday = date("d-m-Y", strtotime($birthday));                
+            }
+        } else {
+            //If guest user => date of birth = 01-01-1970
+            $formattedBirthday = '';
+        }
+    ?>
     // Trigger saveOrder
 
     var _ra = _ra || {};
