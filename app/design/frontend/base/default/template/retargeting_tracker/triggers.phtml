@@ -860,29 +860,6 @@
     <?php Mage::getSingleton('core/session')->unsTriggerCommentOnProduct(); ?>
     <?php endif ?>
 
-
-
-    <?php
-    /*
-        ----------------------- Trigger mouseOverPrice -----------------------
-    */
-    ?>
-    <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
-
-    _ra_helper_addLoadEvent(function () {
-        if (document.getElementById("product-price-<?php echo $_product->getId(); ?>") !== null) {
-            document.getElementById("product-price-<?php echo $_product->getId(); ?>").onmouseover = _ra_triggerMouseOverPrice;
-        }
-        if (document.getElementById("old-price-<?php echo $_product->getId(); ?>") !== null) {
-            document.getElementById("old-price-<?php echo $_product->getId(); ?>").onmouseover = _ra_triggerMouseOverPrice;
-        }
-    });
-
-    <?php endif ?>
-    <?php endif ?>
-
-
-
     <?php
     /*
         ----------------------- Trigger mouseOverAddToCart -----------------------
@@ -935,6 +912,7 @@
             $formattedBirthday = '';
         }
     ?>
+
     // Trigger saveOrder
 
     var _ra = _ra || {};
