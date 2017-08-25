@@ -164,15 +164,17 @@
             }]';
     }
     ?>
-
+    <?php 
+        $productPrices = Mage::helper('retargeting_tracker')->preparePrice($_product);
+    ?>
     var _ra = _ra || {};
     _ra.sendProductInfo = {
         "id": "<?php echo $_product->getId(); ?>",
         "name": "<?php echo htmlspecialchars($_product->getName()); ?>",
         "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
         "img": "<?php echo htmlspecialchars(Mage::helper('catalog/image')->init($_product, 'image')->resize(500)); ?>",
-        "price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
-        "promo": <?php echo(Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0); ?>,
+        "price": <?php echo $productPrices['price']; ?>,
+        "promo": <?php echo $productPrices['promo']; ?>,
         "inventory": {
             "variations": false,
             "stock": <?php echo $_product->getIsInStock() ?>
@@ -690,7 +692,7 @@
 
     <?php endif ?>
     <?php endif ?>
-    <?php endif //magento version ?>
+    <?php                                                                                                         endif //magento version ?>
 
 
     <?php
@@ -806,7 +808,7 @@
         }
     });
     //custom css
-    <?php else : ?>
+    <?php                                                                                                         else : ?>
     function _ra_triggerClickImage() {
         if (typeof _ra.clickImage !== "undefined") {
             _ra.clickImage("<?php echo $_product->getId(); ?>");
@@ -830,7 +832,7 @@
         }
     });
     <?php endif //customcss?>
-    <?php endif //endif product ?>
+    <?php                                                                                                         endif //endif product ?>
     <?php endif ?>
 
 
@@ -857,42 +859,6 @@
 
     <?php Mage::getSingleton('core/session')->unsTriggerCommentOnProduct(); ?>
     <?php endif ?>
-
-
-
-    <?php
-    /*
-        ----------------------- Trigger mouseOverPrice -----------------------
-    */
-    ?>
-    <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
-
-    // Trigger mouseOverPrice
-
-    <?php $_product = Mage::registry('current_product'); ?>
-    <?php if ($_product) : ?>
-    function _ra_triggerMouseOverPrice() {
-        if (typeof _ra.mouseOverPrice !== "undefined") {
-            _ra.mouseOverPrice("<?php echo $_product->getId(); ?>", {
-                "price": <?php echo Mage::helper('tax')->getPrice($_product, $_product->getPrice()); ?>,
-                "promo": <?php echo(Mage::helper('tax')->getPrice($_product, $_product->getPrice()) - Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) > 0 ? Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice()) : 0); ?>
-            });
-        }
-    }
-
-    _ra_helper_addLoadEvent(function () {
-        if (document.getElementById("product-price-<?php echo $_product->getId(); ?>") !== null) {
-            document.getElementById("product-price-<?php echo $_product->getId(); ?>").onmouseover = _ra_triggerMouseOverPrice;
-        }
-        if (document.getElementById("old-price-<?php echo $_product->getId(); ?>") !== null) {
-            document.getElementById("old-price-<?php echo $_product->getId(); ?>").onmouseover = _ra_triggerMouseOverPrice;
-        }
-    });
-
-    <?php endif ?>
-    <?php endif ?>
-
-
 
     <?php
     /*
@@ -930,6 +896,22 @@
     */
     ?>
     <?php if ($info = Mage::getSingleton('core/session')->getTriggerSaveOrder()) : ?>
+    <?php 
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+            //Get customer's date of birth. If date of birth doesn't exist or is not set => NULL;
+            // Comments to be deleted
+            $birthday = Mage::getSingleton('customer/session')->getCustomer()->getDob();
+            
+            if($birthday === NULL) {
+                $formattedBirthday = '';
+            } else {
+                $formattedBirthday = date("d-m-Y", strtotime($birthday));                
+            }
+        } else {
+            //If guest user => date of birth = 01-01-1970
+            $formattedBirthday = '';
+        }
+    ?>
 
     // Trigger saveOrder
 
@@ -943,6 +925,7 @@
         "state": "<?php echo htmlspecialchars($info['state']); ?>",
         "city": "<?php echo htmlspecialchars($info['city']); ?>",
         "address": "<?php echo htmlspecialchars($info['address']); ?>",
+        "birthday": "<?php echo $formattedBirthday; ?>",
         "discount": <?php echo $info['discount']; ?>,
         "discount_code": "<?php echo $info['discount_code']; ?>",
         "shipping": <?php echo $info['shipping']; ?>,
@@ -1008,7 +991,13 @@
     $action = $request->getActionName();
     ?>
     <?php
-    if (($module == 'checkout' && $controller == 'cart' && $action == 'index') || ($module == 'checkout' && $controller == 'onepage' && $action == 'index') || (Mage::getURL('checkout/onepage') == Mage::helper('core/url')->getCurrentUrl()) || (strrpos(Mage::helper('core/url')->getCurrentUrl(), "/onestepcheckout") !== false)
+    if (
+      ($module == 'checkout' && $controller == 'cart' && $action == 'index') || 
+      ($module == 'checkout' && $controller == 'onepage' && $action == 'index') ||
+      ($module == 'checkout/cart' && $controller = 'cart' && $action == 'index') ||
+      ($module == 'checkout/cart' && $controller = 'onepage' && $action == 'index') ||
+      (Mage::getURL('checkout/onepage') == Mage::helper('core/url')->getCurrentUrl()) || 
+      (strrpos(Mage::helper('core/url')->getCurrentUrl(), "/onestepcheckout") !== false)
     ) : ?>
 
     // Trigger checkoutIds
@@ -1031,7 +1020,7 @@
         }
     }
 
-    <?php endif ?>
+    <?php                                                                                                         endif ?>
 
 
     <?php // likeFacebook
@@ -1044,7 +1033,7 @@
             _ra.likeFacebook(<?php echo $_product->getId()?>);
         });
     }
-    <?php endif; //end like facebook ?>
+    <?php                                                                                                         endif; //end like facebook ?>
 
 </script>
 <?php
