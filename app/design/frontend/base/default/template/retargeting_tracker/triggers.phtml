@@ -996,7 +996,10 @@
       ($module == 'checkout' && $controller == 'onepage' && $action == 'index') ||
       ($module == 'checkout/cart' && $controller = 'cart' && $action == 'index') ||
       ($module == 'checkout/cart' && $controller = 'onepage' && $action == 'index') ||
+      ($module == 'checkout' && $controller = 'prime' && $action == 'index') ||
+      ($module == 'checkout/prime' && $controller = 'prime' && $action == 'index') ||
       (Mage::getURL('checkout/onepage') == Mage::helper('core/url')->getCurrentUrl()) || 
+      (Mage::getURL('checkout/prime') == Mage::helper('core/url')->getCurrentUrl()) ||
       (strrpos(Mage::helper('core/url')->getCurrentUrl(), "/onestepcheckout") !== false)
     ) : ?>
 
