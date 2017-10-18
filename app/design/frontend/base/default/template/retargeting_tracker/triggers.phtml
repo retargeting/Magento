@@ -164,8 +164,8 @@
             }]';
     }
     ?>
-    <?php 
-        $productPrices = Mage::helper('retargeting_tracker')->preparePrice($_product);
+    <?php
+    $productPrices = Mage::helper('retargeting_tracker')->preparePrice($_product);
     ?>
     var _ra = _ra || {};
     _ra.sendProductInfo = {
@@ -191,14 +191,14 @@
     <?php endif ?>
     <?php endif ?>
     <?php /* === Remove From Cart === */ ?>
-        <?php if($info = Mage::getSingleton('core/session')->getTriggerRemoveFromCart()) : ?>
-                var _ra = _ra || {};
-                    _ra.removeFromCartInfo = <?php echo $info; ?>;
-                    if (_ra.ready !== undefined) {
-                        _ra.removeFromCart(_ra.removeFromCartInfo.product_id, _ra.removeFromCartInfo.quantity, _ra.removeFromCartInfo.variation);
-                    }
-             <?php Mage::getSingleton('core/session')->unsTriggerRemoveFromCart(); ?>
-        <?php endif; ?>
+    <?php if($info = Mage::getSingleton('core/session')->getTriggerRemoveFromCart()) : ?>
+    var _ra = _ra || {};
+    _ra.removeFromCartInfo = <?php echo $info; ?>;
+    if (_ra.ready !== undefined) {
+        _ra.removeFromCart(_ra.removeFromCartInfo.product_id, _ra.removeFromCartInfo.quantity, _ra.removeFromCartInfo.variation);
+    }
+    <?php Mage::getSingleton('core/session')->unsTriggerRemoveFromCart(); ?>
+    <?php endif; ?>
     <?php /* === Remove From Cart === */ ?>
 
 
@@ -336,6 +336,7 @@
     }
 
     _ra_optElfunc = [];
+
     function _ra_grabVariation() {
         var _ra_vo = {};
         var _ra_voCode = [];
@@ -455,6 +456,7 @@
         };
         return _ra_vo;
     }
+
     _ra_helper_addLoadEvent(function () {
         <?php foreach ($_product->getOptions() as $o) : ?>
         <?php $optionType = $o->getType(); ?>
@@ -802,6 +804,7 @@
             _ra.clickImage("<?php echo $_product->getId(); ?>");
         }
     }
+
     _ra_helper_addLoadEvent(function () {
         if (document.getElementsByClassName("<?php echo $customClass ?>").length > 0) {
             document.getElementsByClassName("<?php echo $customClass ?>")[0].onmouseover = _ra_triggerClickImage;
@@ -896,21 +899,21 @@
     */
     ?>
     <?php if ($info = Mage::getSingleton('core/session')->getTriggerSaveOrder()) : ?>
-    <?php 
-        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
-            //Get customer's date of birth. If date of birth doesn't exist or is not set => NULL;
-            // Comments to be deleted
-            $birthday = Mage::getSingleton('customer/session')->getCustomer()->getDob();
-            
-            if($birthday === NULL) {
-                $formattedBirthday = '';
-            } else {
-                $formattedBirthday = date("d-m-Y", strtotime($birthday));                
-            }
-        } else {
-            //If guest user => date of birth = 01-01-1970
+    <?php
+    if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+        //Get customer's date of birth. If date of birth doesn't exist or is not set => NULL;
+        // Comments to be deleted
+        $birthday = Mage::getSingleton('customer/session')->getCustomer()->getDob();
+
+        if ($birthday === NULL) {
             $formattedBirthday = '';
+        } else {
+            $formattedBirthday = date("d-m-Y", strtotime($birthday));
         }
+    } else {
+        //If guest user => date of birth = 01-01-1970
+        $formattedBirthday = '';
+    }
     ?>
 
     // Trigger saveOrder
@@ -992,12 +995,12 @@
     ?>
     <?php
     if (
-      ($module == 'checkout' && $controller == 'cart' && $action == 'index') || 
-      ($module == 'checkout' && $controller == 'onepage' && $action == 'index') ||
-      ($module == 'checkout/cart' && $controller = 'cart' && $action == 'index') ||
-      ($module == 'checkout/cart' && $controller = 'onepage' && $action == 'index') ||
-      (Mage::getURL('checkout/onepage') == Mage::helper('core/url')->getCurrentUrl()) || 
-      (strrpos(Mage::helper('core/url')->getCurrentUrl(), "/onestepcheckout") !== false)
+    ($module == 'checkout' && $controller == 'cart' && $action == 'index') ||
+    ($module == 'checkout' && $controller == 'onepage' && $action == 'index') ||
+    ($module == 'checkout/cart' && $controller = 'cart' && $action == 'index') ||
+    ($module == 'checkout/cart' && $controller = 'onepage' && $action == 'index') ||
+    (Mage::getURL('checkout/onepage') == Mage::helper('core/url')->getCurrentUrl()) ||
+    (strrpos(Mage::helper('core/url')->getCurrentUrl(), "/onestepcheckout") !== false)
     ) : ?>
 
     // Trigger checkoutIds
