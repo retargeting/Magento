@@ -46,11 +46,12 @@ class Retargeting_REST_API_Client
 	 * @var array
 	 */
 	private $api_parameters = array();
-	
-	/**
-	 * Method: constructor method for Retargeting REST API Client class
-	 * @param string $api_key
-	 */
+
+    /**
+     * Method: constructor method for Retargeting REST API Client class
+     * @param string $api_key
+     * @throws Exception
+     */
 	public function __construct($api_key) {
 		if (is_string($api_key) || is_numeric($api_key)) {
 			$this->api_key = $api_key;
@@ -58,11 +59,12 @@ class Retargeting_REST_API_Client
 			$this->_throwException("checkApiKey");
 		}
 	}
-	
-	/**
-	 * Method: set a new API uri
-	 * @param string $api_uri
-	 */
+
+    /**
+     * Method: set a new API uri
+     * @param string $api_uri
+     * @throws Exception
+     */
 	public function setApiUri($api_uri) {
 		if (is_string($api_uri) && !empty($api_uri)) {
 			$this->api_uri = $api_uri;
@@ -70,11 +72,12 @@ class Retargeting_REST_API_Client
 			$this->_throwException("apiUriType");
 		}
 	}
-	
-	/**
-	 * Method: set a new API version
-	 * @param string $api_version
-	 */
+
+    /**
+     * Method: set a new API version
+     * @param string $api_version
+     * @throws Exception
+     */
 	public function setApiVersion($api_version) {
 		if (is_string($api_version) && !empty($api_version)) {
 			$this->api_version = $api_version;
@@ -82,11 +85,12 @@ class Retargeting_REST_API_Client
 			$this->_throwException("apiVersionType");
 		}
 	}
-	
-	/**
-	 * Method: set a new API response format: json or serial (php serialize)
-	 * @param string $response_format
-	 */
+
+    /**
+     * Method: set a new API response format: json or serial (php serialize)
+     * @param string $response_format
+     * @throws Exception
+     */
 	public function setResponseFormat($response_format = "json") {
 		if (in_array($response_format, array("json", "serial"))) {
 			$this->response_format = $response_format;
@@ -112,25 +116,27 @@ class Retargeting_REST_API_Client
 		$this->api_path[] = $name;
 		return $this;
 	}
-	
-	/**
-	 * Overloading method:  is triggered when invoking inaccessible methods in an object context
-	 * @param string $name
-	 * @param array $arguments
-	 * @see _processRequest()
-	 * @return array
-	 */
+
+    /**
+     * Overloading method:  is triggered when invoking inaccessible methods in an object context
+     * @param string $name
+     * @param array $arguments
+     * @return array
+     * @throws Exception
+     * @see _processRequest()
+     */
 	public function __call($name, $arguments) {
 		$this->api_path[] = $name;
 		$this->api_parameters = $arguments;
 		return $this->_processRequest();
 	}
 
-	/**
-	 * Method: use PHP cURL library to connect with Retargeting REST API and send the request
-	 * @see http://php.net/manual/ro/book.curl.php
-	 * @return array
-	 */
+    /**
+     * Method: use PHP cURL library to connect with Retargeting REST API and send the request
+     * @see http://php.net/manual/ro/book.curl.php
+     * @return array
+     * @throws Exception
+     */
 	private function _processRequest() {
 		if (empty($this->api_path)) {
 			$this->_throwException("emptyApiPath");

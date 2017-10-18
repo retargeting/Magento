@@ -9,7 +9,11 @@
 
 class Retargeting_Tracker_IndexController extends Mage_Core_Controller_Front_Action
 {
-    public function indexAction() {
-        echo '<h1>Have an awesome day! - <a href="http://www.retargeting.biz">Retargeting Team</a></h1>';
+    /**
+     * @return string
+     */
+    public function indexAction()
+    {
+        return 'Retargeting';
     }
 }

@@ -9,12 +9,17 @@
 
 class Retargeting_Tracker_Model_Helppages
 {
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
         $pageCollection = Mage::getModel('cms/page')->getCollection();
         $pages = array();
         foreach ($pageCollection as $page) {
-            $pages[] = array('value'=>$page->getId(), 'label'=>Mage::helper('retargeting_tracker')->__($page->getTitle()));
+            $pages[] = array(
+                'value' => $page->getId(),
+                'label' => Mage::helper('retargeting_tracker')->__($page->getTitle()));
         }
         return $pages;
     }
