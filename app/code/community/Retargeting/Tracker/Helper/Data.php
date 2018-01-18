@@ -16,6 +16,14 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
     const XML_PATH_FACEBOOK = 'retargetingtracker_options/more/facebook';
     const XML_PATH_IMAGECLASS = 'retargetingtracker_options/more/css';
 
+    /**
+     * @return string
+     * */
+    public static function getVersion()
+    {
+        return Mage::getConfig()->getNode('modules/Retargeting_Tracker/version');
+    }
+    
     /*
      * Check if FB is ready to use
      *
