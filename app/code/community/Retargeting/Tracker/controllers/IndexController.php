@@ -14,10 +14,10 @@ class Retargeting_Tracker_IndexController extends Mage_Core_Controller_Front_Act
      */
     public function indexAction()
     {
-        $response = [
+        $response = array(
             'status' => true,
             'data' => 'Retargeting Tracker Version: ' . \Retargeting_Tracker_Helper_Data::getVersion()
-        ];
+        );
 
         return $this->getResponse()
             ->setHeader('Content-Type', 'application/json', 1)
