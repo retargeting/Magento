@@ -49,11 +49,11 @@ class Retargeting_Tracker_CartController extends Mage_Checkout_CartController
                 $cart->save();
                 $this->_getSession()->setCartWasUpdated(true);
 
-                Mage::dispatchEvent('checkout_cart_add_product_complete', [
+                Mage::dispatchEvent('checkout_cart_add_product_complete', array(
                     'product' => $product,
                     'request' => $this->getRequest(),
                     'response' => $this->getResponse()
-                ]);
+                ));
 
                 if (!$this->_getSession()->getNoCartRedirect(true)) {
                     if (!$cart->getQuote()->getHasError()) {
