@@ -14,13 +14,11 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
      */
     public function indexAction()
     {
-
         $productCollection = Mage::getModel('catalog/product')->getCollection();
         $productCollection->addAttributeToSelect(array('name', 'price', 'special_price'));
         $retargetingFeed = array();
 
         foreach ($productCollection as $product) {
-
             $retargetingFeed[] = array(
                 'id' => $product->getId(),
                 'price' => (double)$product->getPrice(),
@@ -40,6 +38,5 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         return $this->getResponse()
             ->setHeader('Content-Type', 'application/json', 1)
             ->setBody($data);
-
     }
 }

@@ -51,7 +51,6 @@ class Retargeting_Tracker_Model_Observer
 
     public function TrackAddToCart($observer)
     {
-
         $magentoVersion = Mage::getVersion();
 
         if ($magentoVersion > "1.4.2.0") {
@@ -110,7 +109,6 @@ class Retargeting_Tracker_Model_Observer
             );
 
             Mage::getSingleton('core/session')->setTriggerAddToCart($info);
-
         } else {
             //Magento 1.4 compatibility
             $helper = Mage::helper('catalog/product');
@@ -142,7 +140,6 @@ class Retargeting_Tracker_Model_Observer
 
     public function TrackCommentOnProduct($observer)
     {
-
         $object = $observer->getEvent()->getObject();
         $productId = $object->getEntityPkValue();
 
@@ -160,7 +157,6 @@ class Retargeting_Tracker_Model_Observer
 
         $magentoVersion = Mage::getVersion();
         if ($magentoVersion > "1.4.2.0") {
-
             $helper = Mage::helper('catalog/product_configuration');
 
             $event = $observer->getEvent();  //Fetches the current event
