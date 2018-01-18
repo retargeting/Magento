@@ -10,10 +10,17 @@
 class Retargeting_Tracker_IndexController extends Mage_Core_Controller_Front_Action
 {
     /**
-     * @return string
+     * @return Zend_Controller_Response_Abstract
      */
     public function indexAction()
     {
-        return 'Retargeting';
+        $response = array(
+            'status' => true,
+            'data' => 'Retargeting Tracker Version: ' . \Retargeting_Tracker_Helper_Data::getVersion()
+        );
+
+        return $this->getResponse()
+            ->setHeader('Content-Type', 'application/json', 1)
+            ->setBody(json_encode($response));
     }
 }
