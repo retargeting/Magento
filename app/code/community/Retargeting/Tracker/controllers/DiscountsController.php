@@ -24,11 +24,9 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
      */
     public function addDiscountCodeAction()
     {
-
         $params = $this->getRequest()->getParams();
 
         if (isset($params['key']) && isset($params['value']) && isset($params['type']) && isset($params['count'])) {
-
             $userApiKey = Mage::getStoreConfig('retargetingtracker_options/token/token');
 
             if ($userApiKey != '' && $params['key'] == $userApiKey && $params['value'] != "" && $params['type'] != "" && $params['count'] != "") {
@@ -47,7 +45,6 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
                     ->setHeader('Content-Type', 'application/json', 1)
                     ->setBody($response);
             }
-
         } else {
             $response = json_encode(array(
                 "status" => false,
@@ -68,12 +65,17 @@ class Retargeting_Tracker_DiscountsController extends Mage_Core_Controller_Front
      */
     private function generateRule($name = null, $discount = 0, $raDiscountType = 0, $count)
     {
-        if ($raDiscountType == 0) $raDiscountType = "fixed value";
-        if ($raDiscountType == 1) $raDiscountType = "percentage";
-        if ($raDiscountType == 2) $raDiscountType = "free shipping";
+        if ($raDiscountType == 0) {
+            $raDiscountType = "fixed value";
+        }
+        if ($raDiscountType == 1) {
+            $raDiscountType = "percentage";
+        }
+        if ($raDiscountType == 2) {
+            $raDiscountType = "free shipping";
+        }
 
         if ($name != null && ($raDiscountType == "fixed value" || $raDiscountType == "free shipping" || $raDiscountType == "percentage")) {
-
             $rule = Mage::getModel('salesrule/rule');
 
             $customerGroupColl = Mage::getModel('customer/group')->getCollection();

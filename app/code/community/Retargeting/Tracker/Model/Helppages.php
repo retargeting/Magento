@@ -23,5 +23,4 @@ class Retargeting_Tracker_Model_Helppages
         }
         return $pages;
     }
-
 }

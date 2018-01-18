@@ -9,5 +9,4 @@
 
 class Retargeting_Tracker_Block_Triggers extends Mage_Core_Block_Template
 {
-
 }
