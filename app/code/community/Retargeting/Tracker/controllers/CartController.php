@@ -67,7 +67,7 @@ class Retargeting_Tracker_CartController extends Mage_Checkout_CartController
                 }
             }
         } catch (Exception $e) {
-            echo $e->getMessage();
+            return $e->getMessage();
         }
     }
 }
