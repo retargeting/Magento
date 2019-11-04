@@ -67,32 +67,32 @@
 
     <?php $_category = Mage::registry('current_category'); ?>
     <?php
-    $_categoryParent = "false";
-    $_categoryBreadcrumb = "[]";
+    $_categoryParent = false;
+    $_categoryBreadcrumb = [];
     if ($_category->getLevel() > 2) {
-        $_categoryParent = '"' . $_category->getParentId() . '"';
+        $_categoryParent = $_category->getParentId();
         $_categoryBreadcrumb = array();
         $breadcrumbCategory = $_category;
         while ($breadcrumbCategory->getLevel() > 2) {
             $breadcrumbCategory = Mage::getModel('catalog/category')->load($breadcrumbCategory->getParentId());
-
-            $_categoryBreadcrumb[] = '[{
-                    "id": "' . $breadcrumbCategory->getId() . '",
-                    "name": "' . htmlspecialchars($breadcrumbCategory->getName()) . '",
-                    "parent": ' . ($breadcrumbCategory->getLevel() > 2 ? '"' . $breadcrumbCategory->getParentId() . '"' : 'false') . '
-                }]';
+            $_categoryBreadcrumb[] = [
+                "id" => $breadcrumbCategory->getId(),
+                "name" => htmlspecialchars($breadcrumbCategory->getName()),
+                "parent" => ($breadcrumbCategory->getLevel() > 2 ? $breadcrumbCategory->getParentId(): false)
+            ];
         }
-        $_categoryBreadcrumb = '[' . implode(', ', $_categoryBreadcrumb) . ']';
     }
+    $_sendCategoryInfo = [
+        'id' => $_category->getId(),
+        'name' => $_category->getName(),
+        'parent' => $_categoryParent,
+        'breadcrumb' => $_categoryBreadcrumb
+    ];
+
     ?>
 
     var _ra = _ra || {};
-    _ra.sendCategoryInfo = {
-        "id": "<?php echo $_category->getId(); ?>",
-        "name": "<?php echo htmlspecialchars($_category->getName()); ?>",
-        "parent": <?php echo $_categoryParent; ?>,
-        "breadcrumb": <?php echo $_categoryBreadcrumb; ?>
-    };
+    _ra.sendCategoryInfo = <?php echo json_encode($_sendCategoryInfo) ?>;
 
     if (_ra.ready !== undefined) {
         if (typeof _ra.sendCategory !== "undefined") {
@@ -995,7 +995,6 @@
     ?>
     <?php
     if (
-    ($module == 'firecheckout' && $controller == 'index' && $action == 'index') ||
     ($module == 'checkout' && $controller == 'cart' && $action == 'index') ||
     ($module == 'checkout' && $controller == 'onepage' && $action == 'index') ||
     ($module == 'checkout/cart' && $controller = 'cart' && $action == 'index') ||
