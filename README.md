@@ -1,5 +1,3 @@
-[![StyleCI](https://styleci.io/repos/35092668/shield?branch=master)](https://styleci.io/repos/35092668)
-
 # Magento Retargeting Extension
 
 Retargeting and Marketing Automation
