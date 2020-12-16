@@ -76,11 +76,11 @@
         while ($breadcrumbCategory->getLevel() > 2) {
             $breadcrumbCategory = Mage::getModel('catalog/category')->load($breadcrumbCategory->getParentId());
 
-            $_categoryBreadcrumb[] = '[{
+            $_categoryBreadcrumb[] = '{
                     "id": "' . $breadcrumbCategory->getId() . '",
                     "name": "' . htmlspecialchars($breadcrumbCategory->getName()) . '",
                     "parent": ' . ($breadcrumbCategory->getLevel() > 2 ? '"' . $breadcrumbCategory->getParentId() . '"' : 'false') . '
-                }]';
+                }';
         }
         $_categoryBreadcrumb = '[' . implode(', ', $_categoryBreadcrumb) . ']';
     }
