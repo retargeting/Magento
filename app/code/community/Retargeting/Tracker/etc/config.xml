@@ -70,13 +70,13 @@
                     </retargeting_tracker>
                 </observers>
             </review_save_after>
-            <sales_order_save_after>
+            <sales_order_place_after>
                 <observers>
                     <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
                         <method>TrackSaveOrder</method>
                     </retargeting_tracker>
                 </observers>
-            </sales_order_save_after>
+            </sales_order_place_after>
         </events>
     </global>
     <frontend>
