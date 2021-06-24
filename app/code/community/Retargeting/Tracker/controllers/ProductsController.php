@@ -26,7 +26,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         $storeId = Mage::app()->getStore()->getId();
         $websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
         
-        $mgV = float) Mage::getVersion();
+        $mgV = (float) Mage::getVersion();
         
         $_productCollection = Mage::getModel('catalog/product')->getCollection();
         $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','image','visibility','status'));
