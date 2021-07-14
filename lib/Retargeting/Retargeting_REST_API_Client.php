@@ -152,7 +152,9 @@ class Retargeting_REST_API_Client
 		$this->api_parameters = array();
 		
 		$curl_request = curl_init();
-		curl_setopt($curl_request, CURLOPT_URL, $api_uri);
+        curl_setopt($curl_request, CURLOPT_CONNECTTIMEOUT, 1);
+        curl_setopt($curl_request, CURLOPT_TIMEOUT, 1);
+        curl_setopt($curl_request, CURLOPT_URL, $api_uri);
 		curl_setopt($curl_request, CURLOPT_POST, true);
 		curl_setopt($curl_request, CURLOPT_POSTFIELDS, $api_parameters);
 		curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, true);
@@ -165,8 +167,20 @@ class Retargeting_REST_API_Client
 				return unserialize(curl_exec($curl_request));
 			}
 		}
-		
-		return curl_exec($curl_request);
+
+        $mh = curl_multi_init();
+        curl_multi_add_handle($mh,$curl_request);
+
+        //execute the multi handle
+        do {
+            $status = curl_multi_exec($mh, $active);
+            if ($active) {
+                // Wait a short time for more activity
+                curl_multi_select($mh);
+            }
+        } while ($active && $status == CURLM_OK);
+
+        return true;
 	}
 	
 	/**
