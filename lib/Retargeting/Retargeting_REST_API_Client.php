@@ -180,6 +180,9 @@ class Retargeting_REST_API_Client
             }
         } while ($active && $status == CURLM_OK);
 
+        curl_multi_remove_handle($mh, $curl_request);
+        curl_multi_close($mh);
+
         return true;
 	}
 	
