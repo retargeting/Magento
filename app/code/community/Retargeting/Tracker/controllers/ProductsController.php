@@ -109,7 +109,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     'product id' => $_product->getId(),
                     'product name' => $_product->getName(),
                     'product url' => $this->buildProductUrl($_product->geturlpath()),
-                    'image url' => $this->buildImageUrl($imgUrl),
+                    'image url' => $imgUrl,
                     'stock' => $this->getQty($product),
                     'price' => number_format($_product->getPrice(), 2),
                     'sale price' => number_format($_product->getFinalPrice(), 2),
