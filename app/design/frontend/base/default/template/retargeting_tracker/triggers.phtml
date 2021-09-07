@@ -47,7 +47,8 @@
         "name": "<?php  echo htmlspecialchars($info['name']); ?>",
         "phone": "<?php  echo htmlspecialchars($info['phone']); ?>",
         "city": "<?php  echo htmlspecialchars($info['city']); ?>",
-        "sex": "<?php  echo htmlspecialchars($info['sex']); ?>"
+        "sex": "<?php  echo htmlspecialchars($info['sex']); ?>",
+        "subscriber_status": true,
     };
     if (_ra.ready !== undefined) {
         if (typeof _ra.setEmail !== "undefined") {
@@ -173,7 +174,9 @@
         "id": "<?php echo $_product->getId(); ?>",
         "name": "<?php echo htmlspecialchars($_product->getName()); ?>",
         "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
-        "img": "<?php echo htmlspecialchars(Mage::helper('catalog/image')->init($_product, 'image')->resize(500)); ?>",
+        "img": "<?php echo htmlspecialchars(Mage::helper('catalog/image')->init($_product, 'image')->resize(500));
+        /* Magento 1.8 */
+        /* htmlspecialchars(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $_product->getThumbnail()) */ ?>",
         "price": <?php echo $productPrices['price']; ?>,
         "promo": <?php echo $productPrices['promo']; ?>,
         "inventory": {
@@ -933,7 +936,8 @@
         "discount": <?php echo $info['discount']; ?>,
         "discount_code": "<?php echo $info['discount_code']; ?>",
         "shipping": <?php echo $info['shipping']; ?>,
-        "total": <?php echo $info['total']; ?>,
+        "total": <?php echo $info['total']; ?>//,
+    //  "subscriber_status": false
     };
     _ra.saveOrderProducts = <?php echo $info['products']; ?>
 

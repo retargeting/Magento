@@ -25,7 +25,9 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         // return json_encode(array('products'));
         $storeId = Mage::app()->getStore()->getId();
         $websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
-
+        
+        $mgV = (float) Mage::getVersion();
+        
         $_productCollection = Mage::getModel('catalog/product')->getCollection();
         $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','image','visibility','status'));
         $_productCollection->addFieldToFilter( 'visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH );
@@ -54,7 +56,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
             $_productCollection->setCurPage($currentPage);
             $_productCollection->load();
             $extra_data = [
-                'categories' => '',
+                'categories' => [],
                 'media gallery' => [],
                 'variations' => [],
                 'margin' => null
@@ -69,11 +71,12 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                     foreach ($products as $p) {
                         $extra_data['variations'][] = [
-                            'id' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
+                            'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
                             'price' => number_format($product->getPrice(), 2),
-                            'sale price' => number_format($product->getFinalPrice(), 2),
+                            'sale_price' => number_format($product->getFinalPrice(), 2),
                             'stock' => $this->getQty($p),
-                            'margin' => null
+                            'size' => $p->getAttributeText('size'),
+                            'color' => $p->getAttributeText('color')
                         ];
                     }
                 }
@@ -91,15 +94,22 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                 foreach($categories as $categoryId) {
                     $category = Mage::getModel('catalog/category')->load($categoryId);
-                    $extra_data['categories'] = $category->getName();
-                    break;
+                    $extra_data['categories'][$categoryId] = $category->getName();
                 }
-
+                
+                if ($mgV===1.8) {
+                   /* Magento 1.8 */
+                    $imgUrl = $this->buildImageUrl($_product->getThumbnail());
+                } else {
+                    /* Magento 1.9+ */
+                    $imgUrl = $this->buildImageUrl($_product->getImage());   
+                }
+                
                 fputcsv($outstream, array(
                     'product id' => $_product->getId(),
                     'product name' => $_product->getName(),
                     'product url' => $this->buildProductUrl($_product->geturlpath()),
-                    'image url' => $this->buildImageUrl($_product->getImage()),
+                    'image url' => $imgUrl,
                     'stock' => $this->getQty($product),
                     'price' => number_format($_product->getPrice(), 2),
                     'sale price' => number_format($_product->getFinalPrice(), 2),
