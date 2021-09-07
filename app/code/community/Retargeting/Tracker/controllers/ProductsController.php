@@ -73,9 +73,10 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         $extra_data['variations'][] = [
                             'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
                             'price' => number_format($product->getPrice(), 2),
-                            'sale price' => number_format($product->getFinalPrice(), 2),
+                            'sale_price' => number_format($product->getFinalPrice(), 2),
                             'stock' => $this->getQty($p),
-                            'margin' => null
+                            'size' => $p->getAttributeText('size'),
+                            'color' => $p->getAttributeText('color')
                         ];
                     }
                 }

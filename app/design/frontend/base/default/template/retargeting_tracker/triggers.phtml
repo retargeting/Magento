@@ -47,7 +47,8 @@
         "name": "<?php  echo htmlspecialchars($info['name']); ?>",
         "phone": "<?php  echo htmlspecialchars($info['phone']); ?>",
         "city": "<?php  echo htmlspecialchars($info['city']); ?>",
-        "sex": "<?php  echo htmlspecialchars($info['sex']); ?>"
+        "sex": "<?php  echo htmlspecialchars($info['sex']); ?>",
+        "subscriber_status": true,
     };
     if (_ra.ready !== undefined) {
         if (typeof _ra.setEmail !== "undefined") {
@@ -935,7 +936,8 @@
         "discount": <?php echo $info['discount']; ?>,
         "discount_code": "<?php echo $info['discount_code']; ?>",
         "shipping": <?php echo $info['shipping']; ?>,
-        "total": <?php echo $info['total']; ?>,
+        "total": <?php echo $info['total']; ?>//,
+    //  "subscriber_status": false
     };
     _ra.saveOrderProducts = <?php echo $info['products']; ?>
 
