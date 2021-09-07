@@ -54,7 +54,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
             $_productCollection->setCurPage($currentPage);
             $_productCollection->load();
             $extra_data = [
-                'categories' => '',
+                'categories' => [],
                 'media gallery' => [],
                 'variations' => [],
                 'margin' => null
@@ -69,7 +69,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                     foreach ($products as $p) {
                         $extra_data['variations'][] = [
-                            'id' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
+                            'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
                             'price' => number_format($product->getPrice(), 2),
                             'sale price' => number_format($product->getFinalPrice(), 2),
                             'stock' => $this->getQty($p),
@@ -91,8 +91,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                 foreach($categories as $categoryId) {
                     $category = Mage::getModel('catalog/category')->load($categoryId);
-                    $extra_data['categories'] = $category->getName();
-                    break;
+                    $extra_data['categories'][$categoryId] = $category->getName();
                 }
 
                 fputcsv($outstream, array(
