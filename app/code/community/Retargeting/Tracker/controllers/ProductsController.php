@@ -57,7 +57,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
             $_productCollection->load();
             $extra_data = [
                 'categories' => [],
-                'media gallery' => [],
+                'media_gallery' => [],
                 'variations' => [],
                 'margin' => null
             ];
@@ -86,7 +86,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         if($img['disabled'] != '0') {
                             continue;
                         }
-                        $extra_data['media gallery'][] = $this->buildImageUrl($img['file']);
+                        $extra_data['media_gallery'][] = $this->buildImageUrl($img['file']);
                     }
                 }
 
