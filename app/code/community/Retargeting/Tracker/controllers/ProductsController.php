@@ -55,14 +55,16 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         do {
             $_productCollection->setCurPage($currentPage);
             $_productCollection->load();
-            $extra_data = [
-                'categories' => [],
-                'media gallery' => [],
-                'variations' => [],
-                'margin' => null
-            ];
 
             foreach ($_productCollection as $_product) {
+                
+                $extra_data = [
+                    'categories' => [],
+                    'media gallery' => [],
+                    'variations' => [],
+                    'margin' => null
+                ];
+
                 $product = Mage::getModel('catalog/product')->load($_product->getId());
 
                 if($product->getTypeId() == 'configurable') {
