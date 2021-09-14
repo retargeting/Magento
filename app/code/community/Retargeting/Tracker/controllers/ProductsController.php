@@ -55,14 +55,16 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         do {
             $_productCollection->setCurPage($currentPage);
             $_productCollection->load();
-            $extra_data = [
-                'categories' => [],
-                'media_gallery' => [],
-                'variations' => [],
-                'margin' => null
-            ];
 
             foreach ($_productCollection as $_product) {
+                
+                $extra_data = [
+                    'categories' => [],
+                    'media_gallery' => [],
+                    'variations' => [],
+                    'margin' => null
+                ];
+
                 $product = Mage::getModel('catalog/product')->load($_product->getId());
 
                 if($product->getTypeId() == 'configurable') {
@@ -93,17 +95,12 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 $categories = $_product->getCategoryIds();
 
                 foreach($categories as $categoryId) {
-                    $category = Mage::getModel('catalog/category')->load($categoryId);
-                    $extra_data['categories'][$categoryId] = $category->getName();
+                    if($categoryId !== 2){
+                        $category = Mage::getModel('catalog/category')->load($categoryId);
+                        $extra_data['categories'][$categoryId] = $category->getName();
+                    }
                 }
-                
-                if ($mgV===1.8) {
-                   /* Magento 1.8 */
-                    $imgUrl = $this->buildImageUrl($_product->getThumbnail());
-                } else {
-                    /* Magento 1.9+ */
-                    $imgUrl = $this->buildImageUrl($_product->getImage());   
-                }
+                $imgUrl = $_product->getImageUrl();
                 
                 fputcsv($outstream, array(
                     'product id' => $_product->getId(),
