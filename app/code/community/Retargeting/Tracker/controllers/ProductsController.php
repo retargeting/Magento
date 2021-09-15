@@ -27,6 +27,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         $websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
         
         $mgV = (float) Mage::getVersion();
+        $media = Mage::getUrl('media');
         
         $_productCollection = Mage::getModel('catalog/product')->getCollection();
         $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','image','visibility','status'));
@@ -100,7 +101,8 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         $extra_data['categories'][$categoryId] = $category->getName();
                     }
                 }
-                $imgUrl = $_product->getImageUrl();
+                //$imgUrl = $_product->getImageUrl();
+                $imgUrl = $media . 'catalog/product' . $_product->getImage();
                 
                 fputcsv($outstream, array(
                     'product id' => $_product->getId(),
