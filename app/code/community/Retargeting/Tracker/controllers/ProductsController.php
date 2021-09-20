@@ -70,6 +70,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     'margin' => null
                 ];
 
+                // $product = $_product;
                 $product = Mage::getModel('catalog/product')->load($_product->getId());
 
                 if($product->getTypeId() == 'configurable') {
@@ -112,9 +113,12 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                      /* Magento 1.9+ */
                      $imgUrl = $_product->getImage(); 
                 }
-                if( "no_selection" === $imgUrl ){
+                if( "no_selection" === $imgUrl || empty($_product->getPrice())){
                     continue;
                 }
+
+                $salePrice = empty($_product->getFinalPrice()) ? $_product->getPrice() : $_product->getFinalPrice();
+                
                 $imgUrl = $this->buildImageUrl($imgUrl);
                 
                 fputcsv($outstream, array(
@@ -123,8 +127,8 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     'product url' => $this->buildProductUrl($_product->geturlpath()),
                     'image url' => $imgUrl,
                     'stock' => $this->getQty($product),
-                    'price' => number_format($_product->getPrice(), 2),
-                    'sale price' => number_format($_product->getFinalPrice(), 2),
+                    'price' => number_format($_product->getPrice(), 2, '.', ''),
+                    'sale price' => number_format($salePrice, 2, '.', ''),
                     'brand' => '',
                     'category' => $category->getName(),
                     'extra data' => json_encode($extra_data, JSON_UNESCAPED_SLASHES)
