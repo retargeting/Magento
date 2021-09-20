@@ -22,13 +22,17 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
     public function indexAction()
     {
-        // return json_encode(array('products'));
+        error_reporting(E_ALL);
+        ini_set("display_errors", 1);
+
+        header("Content-Disposition: attachment; filename=retargeting.csv");
+        header("Content-type: text/csv");
+
         $storeId = Mage::app()->getStore()->getId();
         $websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
         
         $mgV = (float) Mage::getVersion();
-        $media = Mage::getUrl('media');
-        
+
         $_productCollection = Mage::getModel('catalog/product')->getCollection();
         $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','image','visibility','status'));
         $_productCollection->addFieldToFilter( 'visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH );
@@ -101,8 +105,17 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         $extra_data['categories'][$categoryId] = $category->getName();
                     }
                 }
-                //$imgUrl = $_product->getImageUrl();
-                $imgUrl = $media . 'catalog/product' . $_product->getImage();
+                if ($mgV===1.8) {
+                    /* Magento 1.8 */
+                     $imgUrl = $_product->getThumbnail();
+                 } else {
+                     /* Magento 1.9+ */
+                     $imgUrl = $_product->getImage(); 
+                }
+                if( "no_selection" === $imgUrl ){
+                    continue;
+                }
+                $imgUrl = $this->buildImageUrl($imgUrl);
                 
                 fputcsv($outstream, array(
                     'product id' => $_product->getId(),
