@@ -118,8 +118,15 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 }
 
                 $salePrice = empty($_product->getFinalPrice()) ? $_product->getPrice() : $_product->getFinalPrice();
-                
+
                 $imgUrl = $this->buildImageUrl($imgUrl);
+                
+                $brand = '';
+                /*
+                $brand = empty($product->getAttributeText('manufacturer')) ?
+                    '' : $product->getAttributeText('manufacturer');
+                */
+                
                 
                 fputcsv($outstream, array(
                     'product id' => $_product->getId(),
@@ -129,7 +136,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     'stock' => $this->getQty($product),
                     'price' => number_format($_product->getPrice(), 2, '.', ''),
                     'sale price' => number_format($salePrice, 2, '.', ''),
-                    'brand' => '',
+                    'brand' => $brand,
                     'category' => $category->getName(),
                     'extra data' => json_encode($extra_data, JSON_UNESCAPED_SLASHES)
                 ), ',', '"');
