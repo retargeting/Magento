@@ -106,14 +106,9 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         $extra_data['categories'][$categoryId] = $category->getName();
                     }
                 }
-                if ($mgV===1.8) {
-                    /* Magento 1.8 */
-                     $imgUrl = $_product->getThumbnail();
-                 } else {
-                     /* Magento 1.9+ */
-                     $imgUrl = $_product->getImage(); 
-                }
-                if( "no_selection" === $imgUrl || empty($_product->getPrice())){
+                $imgUrl = $_product->getImage();
+                
+                if( "no_selection" === $imgUrl || empty($imgUrl) || empty($_product->getPrice())){
                     continue;
                 }
 
