@@ -167,7 +167,7 @@ class Retargeting_Tracker_Model_Observer
             $products = array();
             foreach ($order->getAllVisibleItems() as $item) {
                 $itemOptions = $item->getProductOptions();
-                $variationCode = "false";
+                $variationCode = false;
                 $optionsCode = array();
 
                 $product = Mage::getModel('catalog/product')->load($item->getProductId());
@@ -187,12 +187,12 @@ class Retargeting_Tracker_Model_Observer
                     }
                 }
 
-                $variationCode = !empty($optionsCode) ? '"' . implode('-', $optionsCode) . '"' : "false";
+                $variationCode = !empty($optionsCode) ? '"' . implode('-', $optionsCode) . '"' : false;
 
                 $products[] = array(
                     'id' => $item->getProductId(),
                     'quantity' => $item->getQtyOrdered(),
-                    'price' => Mage::helper('tax')->getPrice($item, $item->getPrice()),
+                    'price' => number_format(Mage::helper('tax')->getPrice($item, $item->getPrice()), 2, '.', ''),
                     'variation_code' => $variationCode
                 );
             }
@@ -243,7 +243,7 @@ class Retargeting_Tracker_Model_Observer
                 $products[] = array(
                     'id' => $item->getProductId(),
                     'quantity' => $item->getQtyOrdered(),
-                    'price' => Mage::helper('tax')->getPrice($item, $item->getPrice()),
+                    'price' => number_format(Mage::helper('tax')->getPrice($item, $item->getPrice()), 2, '.', ''),
                     'variation_code' => false
                 );
             }
