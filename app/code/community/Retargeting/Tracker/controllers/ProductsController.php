@@ -106,20 +106,28 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         $extra_data['categories'][$categoryId] = $category->getName();
                     }
                 }
+                
+                /*
                 if ($mgV===1.8) {
-                    /* Magento 1.8 */
+                    /* Magento 1.8 * /
                      $imgUrl = $_product->getThumbnail();
                  } else {
-                     /* Magento 1.9+ */
+                     /* Magento 1.9+ * /
                      $imgUrl = $_product->getImage(); 
                 }
-                if( "no_selection" === $imgUrl || empty($_product->getPrice())){
+                */
+
+                $imgUrl = Mage::helper('retargeting_tracker')->getFromCache(
+                    Mage::helper('catalog/image')->init($_product, 'image')->resize(500)
+                );
+
+                if( "no_selection" === $imgUrl || empty($imgUrl) || empty($_product->getPrice())){
                     continue;
                 }
 
                 $salePrice = empty($_product->getFinalPrice()) ? $_product->getPrice() : $_product->getFinalPrice();
 
-                $imgUrl = $this->buildImageUrl($imgUrl);
+                /* $imgUrl = $this->buildImageUrl($imgUrl); */
                 
                 $brand = '';
                 /*
