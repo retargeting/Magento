@@ -19,7 +19,29 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
     {
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $path;
     }
-
+/*
+    private $delete = null;
+    public function getFromCache($imgUrl = null)
+    {
+        if ($this->delete === null) {
+            $start = false;
+            $count = 0;
+            $this->delete = '';
+            foreach (explode("/",$imgUrl) as $k => $v) {
+                if ($v === "cache") {
+                    $start = true;
+                }
+                if ($start) {
+                    $count++;
+                    if ($count <= 5) {
+                        $this->delete .= '/'.$v;
+                    }
+                }
+            }
+        }
+        return str_replace($this->delete, "", $imgUrl);
+    }
+*/
     public function indexAction()
     {
         error_reporting(E_ALL);
@@ -106,7 +128,16 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         $extra_data['categories'][$categoryId] = $category->getName();
                     }
                 }
-                $imgUrl = $_product->getImage();
+
+                /*
+                $imgUrl = $this->getFromCache(
+                    Mage::helper('catalog/image')->init($_product, 'image')->resize(500)
+                );
+                */
+
+                $imgUrl = Mage::helper('retargeting_tracker')->getFromCache(
+                    Mage::helper('catalog/image')->init($_product, 'image')->resize(500)
+                );
                 
                 if( "no_selection" === $imgUrl || empty($imgUrl) || empty($_product->getPrice())){
                     continue;
@@ -114,7 +145,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                 $salePrice = empty($_product->getFinalPrice()) ? $_product->getPrice() : $_product->getFinalPrice();
 
-                $imgUrl = $this->buildImageUrl($imgUrl);
+                /* $imgUrl = $this->buildImageUrl($imgUrl); */
                 
                 $brand = '';
                 /*
