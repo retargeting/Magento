@@ -12,6 +12,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
     protected function buildImageUrl($path)
     {
+        if (substr($path,0,1) !== "/") {  $path = "/".$path; }
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $path;
     }
 
@@ -51,12 +52,12 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         header("Content-type: text/csv");
 
         $storeId = Mage::app()->getStore()->getId();
-        $websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
+        //$websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
         
-        $mgV = (float) Mage::getVersion();
+        //$mgV = (float) Mage::getVersion();
 
         $_productCollection = Mage::getModel('catalog/product')->getCollection();
-        $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','image','visibility','status'));
+        $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','visibility','status'));
         $_productCollection->addFieldToFilter( 'visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH );
         $_productCollection->addAttributeToFilter( 'status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED );
 
@@ -120,7 +121,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     }
                 }
 
-                $categories = $_product->getCategoryIds();
+                $categories = $product->getCategoryIds();
 
                 foreach($categories as $categoryId) {
                     if($categoryId !== 2){
@@ -129,38 +130,25 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     }
                 }
 
-                /*
-                $imgUrl = $this->getFromCache(
-                    Mage::helper('catalog/image')->init($_product, 'image')->resize(500)
-                );
-                */
-
                 $imgUrl = Mage::helper('retargeting_tracker')->getFromCache(
-                    Mage::helper('catalog/image')->init($_product, 'image')->resize(500)
+                    Mage::helper('catalog/image')->init($product, 'image')->resize(500)
                 );
                 
-                if( "no_selection" === $imgUrl || empty($imgUrl) || empty($_product->getPrice())){
+                if( "no_selection" === $imgUrl || empty($imgUrl) || empty($product->getPrice())){
                     continue;
                 }
 
-                $salePrice = empty($_product->getFinalPrice()) ? $_product->getPrice() : $_product->getFinalPrice();
-
-                /* $imgUrl = $this->buildImageUrl($imgUrl); */
+                $salePrice = empty($product->getFinalPrice()) ? $product->getPrice() : $product->getFinalPrice();
                 
                 $brand = '';
-                /*
-                $brand = empty($product->getAttributeText('manufacturer')) ?
-                    '' : $product->getAttributeText('manufacturer');
-                */
-                
                 
                 fputcsv($outstream, array(
-                    'product id' => $_product->getId(),
-                    'product name' => $_product->getName(),
-                    'product url' => $this->buildProductUrl($_product->geturlpath()),
+                    'product id' => $product->getId(),
+                    'product name' => $product->getName(),
+                    'product url' => $this->buildProductUrl($product->geturlpath()),
                     'image url' => $imgUrl,
                     'stock' => $this->getQty($product),
-                    'price' => number_format($_product->getPrice(), 2, '.', ''),
+                    'price' => number_format($product->getPrice(), 2, '.', ''),
                     'sale price' => number_format($salePrice, 2, '.', ''),
                     'brand' => $brand,
                     'category' => $category->getName(),
