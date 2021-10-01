@@ -132,7 +132,7 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
                 }
                 if ($start) {
                     $count++;
-                    if ($count < 5){
+                    if ($count <= 5){
                         $this->delete .= '/'.$v;
                     }
                 }
