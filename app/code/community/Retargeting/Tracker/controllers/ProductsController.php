@@ -20,29 +20,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
     {
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $path;
     }
-/*
-    private $delete = null;
-    public function getFromCache($imgUrl = null)
-    {
-        if ($this->delete === null) {
-            $start = false;
-            $count = 0;
-            $this->delete = '';
-            foreach (explode("/",$imgUrl) as $k => $v) {
-                if ($v === "cache") {
-                    $start = true;
-                }
-                if ($start) {
-                    $count++;
-                    if ($count <= 5) {
-                        $this->delete .= '/'.$v;
-                    }
-                }
-            }
-        }
-        return str_replace($this->delete, "", $imgUrl);
-    }
-*/
+
     public function indexAction()
     {
         error_reporting(E_ALL);
@@ -93,7 +71,6 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     'margin' => null
                 ];
 
-                // $product = $_product;
                 $product = Mage::getModel('catalog/product')->load($_product->getId());
 
                 if($product->getTypeId() == 'configurable') {
