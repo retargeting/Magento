@@ -101,17 +101,17 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 $categories = $product->getCategoryIds();
 
                 foreach($categories as $categoryId) {
-                    if($categoryId !== 2){
-                        $category = Mage::getModel('catalog/category')->load($categoryId);
-                        $extra_data['categories'][$categoryId] = $category->getName();
-                    }
+                    $category = Mage::getModel('catalog/category')->load($categoryId);
+                    $extra_data['categories'][$categoryId] = $category->getName();
                 }
 
                 $imgUrl = Mage::helper('retargeting_tracker')->getFromCache(
                     Mage::helper('catalog/image')->init($product, 'image')->resize(500)
                 );
                 
-                if( "no_selection" === $imgUrl || empty($imgUrl) || empty($product->getPrice())){
+                if( "no_selection" === $imgUrl ||
+                    empty($imgUrl) ||
+                    empty($product->getPrice())){
                     continue;
                 }
 
@@ -128,7 +128,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     'price' => number_format($product->getPrice(), 2, '.', ''),
                     'sale price' => number_format($salePrice, 2, '.', ''),
                     'brand' => $brand,
-                    'category' => $category->getName(),
+                    'category' => $category->getName() ?? "Root",
                     'extra data' => json_encode($extra_data, JSON_UNESCAPED_SLASHES)
                 ), ',', '"');
             }
