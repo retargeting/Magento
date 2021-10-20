@@ -105,6 +105,10 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     $extra_data['categories'][$categoryId] = $category->getName();
                 }
 
+                if (empty($extra_data['categories'])) {
+                    $extra_data['categories']['root'] = 'Root';
+                }
+
                 $imgUrl = Mage::helper('retargeting_tracker')->getFromCache(
                     Mage::helper('catalog/image')->init($product, 'image')->resize(500)
                 );
@@ -128,7 +132,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     'price' => number_format($product->getPrice(), 2, '.', ''),
                     'sale price' => number_format($salePrice, 2, '.', ''),
                     'brand' => $brand,
-                    'category' => $category->getName() ?? "Root",
+                    'category' => end($extra_data['categories']),
                     'extra data' => json_encode($extra_data, JSON_UNESCAPED_SLASHES)
                 ), ',', '"');
             }
