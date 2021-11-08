@@ -9,6 +9,31 @@
 
 class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_Action
 {
+    private $delete = null;
+    
+    public function prepareImg($product)
+    {
+        $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
+
+        if ($this->delete === null) {
+            $exp = explode("/",$imgUrl);
+            $start = false;
+            $count = 0;
+            $this->delete = '';
+            foreach ($exp as $k => $v) {
+                if ($v === "cache") {
+                    $start = true;
+                }
+                if ($start) {
+                    $count++;
+                    if ($count <= 5){
+                        $this->delete .= '/'.$v;
+                    }
+                }
+            }
+        }
+        return str_replace($this->delete, "", $imgUrl);
+    }
 
     protected function buildImageUrl($path)
     {
@@ -109,9 +134,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                     $extra_data['categories']['root'] = 'Root';
                 }
 
-                $imgUrl = Mage::helper('retargeting_tracker')->getFromCache(
-                    Mage::helper('catalog/image')->init($product, 'image')->resize(500)
-                );
+                $imgUrl = $this->prepareImg($product);
                 
                 if( "no_selection" === $imgUrl ||
                     empty($imgUrl) ||

@@ -187,7 +187,7 @@ class Retargeting_Tracker_Model_Observer
                     }
                 }
 
-                $variationCode = !empty($optionsCode) ? '"' . implode('-', $optionsCode) . '"' : false;
+                $variationCode = !empty($optionsCode) ? implode('-', $optionsCode) : false;
 
                 $products[] = array(
                     'id' => $item->getProductId(),

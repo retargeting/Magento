@@ -15,6 +15,30 @@
 <?php
 $magentoVersion = Mage::getVersion();
 $add_to_cart_id = Mage::getStoreConfig('retargetingtracker_options/more/cartid');
+
+function prepareImg($product,$delete = null)
+{
+    $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
+    
+        $exp = explode("/",$imgUrl);
+        $start = false;
+        $count = 0;
+        $delete = '';
+        foreach ($exp as $k => $v) {
+            if ($v === "cache") {
+                $start = true;
+            }
+            if ($start) {
+                $count++;
+                if ($count <= 5){
+                    $delete .= '/'.$v;
+                }
+            }
+        }
+    }
+
+    return str_replace($delete, "", $imgUrl);
+}
 ?>
 
 <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
@@ -171,6 +195,7 @@ $add_to_cart_id = Mage::getStoreConfig('retargetingtracker_options/more/cartid')
     <?php
     $productPrices = Mage::helper('retargeting_tracker')->preparePrice($_product);
     $_pstock = Mage::helper('retargeting_tracker')->checkStock($_product);
+
     ?>
     var _ra = _ra || {};
     _ra.sendProductInfo = {
@@ -178,9 +203,7 @@ $add_to_cart_id = Mage::getStoreConfig('retargetingtracker_options/more/cartid')
         "name": "<?php echo htmlspecialchars($_product->getName()); ?>",
         "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
         "img": "<?php echo htmlspecialchars(
-            Mage::helper('retargeting_tracker')->getFromCache(
-                Mage::helper('catalog/image')->init($_product, 'image')->resize(500)
-            )
+            prepareImg($_product)
         );
         /* Magento 1.8 */
         /* htmlspecialchars(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $_product->getThumbnail()) */ ?>",
@@ -297,10 +320,8 @@ $add_to_cart_id = Mage::getStoreConfig('retargetingtracker_options/more/cartid')
         "name": "<?php echo htmlspecialchars($_product->getName()); ?>",
         "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
         "img": "<?php echo htmlspecialchars(
-            Mage::helper('retargeting_tracker')->getFromCache(
-                Mage::helper('catalog/image')->init($_product, 'image')->resize(500)
-            )
-        );?>",
+            prepareImg($_product)
+        ); ?>",
         "price": <?php echo $productPrices['price']; ?>,
         "promo": <?php echo $productPrices['promo']; ?>,
         "inventory": {
