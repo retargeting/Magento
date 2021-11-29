@@ -14,6 +14,18 @@
             <version>1.4.2</version>
         </Retargeting_Tracker>
     </modules>
+    <crontab>
+        <jobs>
+            <feedgen>
+                <schedule>
+                    <cron_expr>0 */4 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>retargeting_tracker/observer::feedgen</model>
+                </run>
+            </feedgen>
+        </jobs>
+    </crontab>
     <global>
         <blocks>
             <retargeting_tracker>
