@@ -49,178 +49,191 @@ class Retargeting_Tracker_Model_Observer
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $path;
     }
 
+    public static $cronFeed = false;
+    
     public function feedgen($schedule = null)
     {
-        ini_set('display_errors', '1');
-        error_reporting(E_ALL);
+        if (self::$cronFeed) {
+        /*
+        <Files *retargeting.csv>
+            order allow,deny
+            allow from all
+        </Files>
+        */
+            ini_set('display_errors', '1');
+            error_reporting(E_ALL);
 
-        ini_set('max_execution_time', 8200);//3600);
-        ini_set('memory_limit', '8G');
-        set_time_limit(8200);
-        
-        //header("Content-Disposition: attachment; filename=retargeting.csv");
-        //header("Content-type: text/csv");
-
-        $dir = Mage::getBaseDir('base');
-        // $link = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
-    // echo $dir;
-    // die();
-        $name = date('m_d_Y_H_i_s');
-        
-        $files = [
-            'tmp' => [
-                $dir . '/retargeting'.$name.'.csv',
-                'w+'
-            ],
-            'static' => [
-                $dir . '/retargeting.csv',
-                'w'
-            ]
-        ];
-
-        $storeId = Mage::app()->getStore()->getId();
-        
-        // $websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
-        
-        //$mgV = (float) Mage::getVersion();
-        try{
-            $_productCollection = Mage::getModel('catalog/product')->getCollection();
-            $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','visibility','status'));
-            $_productCollection->addFieldToFilter( 'visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH );
-            $_productCollection->addAttributeToFilter( 'status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED );
-
-            $_productCollection->setPageSize(100);
-
-            $pages = $_productCollection->getLastPageNumber();
-            $currentPage = 1;
-            // chmod( $files['tmp'][0], 777);
-            $outstream = fopen($files['tmp'][0], $files['tmp'][1]) or die('fail to create file');
-
-            fputcsv($outstream, array(
-                'product id',
-                'product name',
-                'product url',
-                'image url',
-                'stock',
-                'price',
-                'sale price',
-                'brand',
-                'category',
-                'extra data'
-            ), ',', '"');
-
-            do {
-                $_productCollection->setCurPage($currentPage);
-                $_productCollection->load();
-
-                foreach ($_productCollection as $_product) {
-                    
-                    $extra_data = [
-                        'categories' => [],
-                        'media_gallery' => [],
-                        'variations' => [],
-                        'margin' => null
-                    ];
-
-                    $product = Mage::getModel('catalog/product')->load($_product->getId());
-
-                    if(isset($product->media_gallery['images'])) {
-                        foreach ($product->media_gallery['images'] as $img) {
-                            if($img['disabled'] != '0') {
-                                continue;
-                            }
-                            $extra_data['media_gallery'][] = $this->buildImageUrl($img['file']);
-                        }
-                    }
-
-                    $categories = $product->getCategoryIds();
-
-                    foreach($categories as $categoryId) {
-                        $category = Mage::getModel('catalog/category')
-                            ->setStoreId($storeId)
-                            ->load($categoryId);
-                        if (!empty($category->getName())) {
-                            $extra_data['categories'][$categoryId] = $category->getName();
-                        }
-                    }
-
-                    if (empty($extra_data['categories'])) {
-                        $extra_data['categories']['root'] = 'Root';
-                    }
-
-                    $imgUrl = $this->prepareImg($product);
-                    $productURL = $this->buildProductUrl($product->geturlpath());
-                    $price = $product->getPrice();
-
-                    if( "no_selection" === $imgUrl ||
-                        empty($imgUrl) ||
-                        empty((float) $price) || !filter_var($productURL, FILTER_VALIDATE_URL)){
-                        continue;
-                    }
-                    $finalPrice = $product->getFinalPrice();
-
-                    $salePrice = empty((float) $finalPrice) ? $price : $finalPrice;
-
-                    if($product->getTypeId() == 'configurable') {
-                        $productType = Mage::getModel('catalog/product_type_configurable');
-                        $products = $productType->getUsedProducts(null, $product);
-
-                        foreach ($products as $p) {
-                            $extra_data['variations'][] = [
-                                'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
-                                'price' => number_format($price, 2),
-                                'sale_price' => number_format($salePrice, 2),
-                                'stock' => $this->getQty($p),
-                                'size' => $p->getAttributeText('size'),
-                                'color' => $p->getAttributeText('color')
-                            ];
-                        }
-                    }
-
-                    $brand = '';
-                    
-                    fputcsv($outstream, array(
-                        'product id' => $product->getId(),
-                        'product name' => $product->getName(),
-                        'product url' => $productURL,
-                        'image url' => $imgUrl,
-                        'stock' => $this->getQty($product),
-                        'price' => number_format($price, 2, '.', ''),
-                        'sale price' => number_format($salePrice, 2, '.', ''),
-                        'brand' => $brand,
-                        'category' => end($extra_data['categories']),
-                        'extra data' => json_encode($extra_data, JSON_UNESCAPED_SLASHES)
-                    ), ',', '"');
-                }
-                // if ($currentPage === 10) {
-                //    $currentPage = $pages;
-                // }
-
-                $currentPage++;
-                $_productCollection->clear();
-            } while ($currentPage <= $pages);
-
-            fclose($outstream);
-            chmod($files['static'][0], 777);
-
-            if(!copy($files['tmp'][0], $files['static'][0]))
-            {
-                $errors = error_get_last();
-                $myfile = fopen($dir . '/errorRTG.log', "w+") or die("Unable to open file!");
-                fwrite($myfile, "COPY ERROR: ".$errors['type']);
-                fwrite($myfile, "<br />\n".$errors['message']);
-                fwrite($myfile, "<br />\n".json_encode($errors));
-                fclose($myfile);
-            }
+            ini_set('max_execution_time', 8200);//3600);
+            ini_set('memory_limit', '8G');
+            set_time_limit(8200);
+            
+            //header("Content-Disposition: attachment; filename=retargeting.csv");
+            //header("Content-type: text/csv");
+            //$link = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+            //echo $dir;
+            //die();
+            //$websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
+            //$mgV = (float) Mage::getVersion();
 
             //copy($files['tmp'][0], $files['static'][0]);
             //chmod( $files['static'][0], 777);
-        } catch (Exception $e) {
-            $myfile = fopen($dir . '/errorRTG.log', "w+") or die("Unable to open file!");
-            fwrite($myfile, $e->getMessage());
-            fwrite($myfile, $e->getTraceAsString());
-            fclose($myfile);
+
+            //chmod($files['static'][0], 777);
+
             //throw new Exception(Mage::helper('cron')->__('Unable to save This Cron Job'));
+
+            $dir = Mage::getBaseDir('base').'/app/code/community/Retargeting/Tracker/Feed';
+            
+            $name = date('m_d_Y_H_i_s');
+            
+            $files = [
+                'tmp' => [
+                    $dir . '/retargeting.'.$name.'.csv',
+                    'w+'
+                ],
+                'static' => [
+                    $dir . '/retargeting.csv',
+                    'w'
+                ]
+            ];
+
+            $storeId = Mage::app()->getStore()->getId();
+            
+            try{
+                $_productCollection = Mage::getModel('catalog/product')->getCollection();
+                $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','visibility','status'));
+                $_productCollection->addFieldToFilter( 'visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH );
+                $_productCollection->addAttributeToFilter( 'status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED );
+
+                $_productCollection->setPageSize(100);
+
+                $pages = $_productCollection->getLastPageNumber();
+                $currentPage = 1;
+                // chmod( $files['tmp'][0], 777);
+                $outstream = fopen($files['tmp'][0], $files['tmp'][1]) or die('fail to create file ' .$files['tmp'][0].' - '. $files['tmp'][1] );
+
+                fputcsv($outstream, array(
+                    'product id',
+                    'product name',
+                    'product url',
+                    'image url',
+                    'stock',
+                    'price',
+                    'sale price',
+                    'brand',
+                    'category',
+                    'extra data'
+                ), ',', '"');
+
+                do {
+                    $_productCollection->setCurPage($currentPage);
+                    $_productCollection->load();
+
+                    foreach ($_productCollection as $_product) {
+                        
+                        $extra_data = [
+                            'categories' => [],
+                            'media_gallery' => [],
+                            'variations' => [],
+                            'margin' => null
+                        ];
+
+                        $product = Mage::getModel('catalog/product')->load($_product->getId());
+
+                        if(isset($product->media_gallery['images'])) {
+                            foreach ($product->media_gallery['images'] as $img) {
+                                if($img['disabled'] != '0') {
+                                    continue;
+                                }
+                                $extra_data['media_gallery'][] = $this->buildImageUrl($img['file']);
+                            }
+                        }
+
+                        $categories = $product->getCategoryIds();
+
+                        foreach($categories as $categoryId) {
+                            $category = Mage::getModel('catalog/category')
+                                ->setStoreId($storeId)
+                                ->load($categoryId);
+                            if (!empty($category->getName())) {
+                                $extra_data['categories'][$categoryId] = $category->getName();
+                            }
+                        }
+
+                        if (empty($extra_data['categories'])) {
+                            $extra_data['categories']['root'] = 'Root';
+                        }
+
+                        $imgUrl = $this->prepareImg($product);
+                        $productURL = $this->buildProductUrl($product->geturlpath());
+                        $price = $product->getPrice();
+
+                        if( "no_selection" === $imgUrl ||
+                            empty($imgUrl) ||
+                            empty((float) $price) || !filter_var($productURL, FILTER_VALIDATE_URL)){
+                            continue;
+                        }
+                        $finalPrice = $product->getFinalPrice();
+
+                        $salePrice = empty((float) $finalPrice) ? $price : $finalPrice;
+
+                        if($product->getTypeId() == 'configurable') {
+                            $productType = Mage::getModel('catalog/product_type_configurable');
+                            $products = $productType->getUsedProducts(null, $product);
+
+                            foreach ($products as $p) {
+                                $extra_data['variations'][] = [
+                                    'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
+                                    'price' => number_format($price, 2),
+                                    'sale_price' => number_format($salePrice, 2),
+                                    'stock' => $this->getQty($p),
+                                    'size' => $p->getAttributeText('size'),
+                                    'color' => $p->getAttributeText('color')
+                                ];
+                            }
+                        }
+
+                        $brand = '';
+                        
+                        fputcsv($outstream, array(
+                            'product id' => $product->getId(),
+                            'product name' => $product->getName(),
+                            'product url' => $productURL,
+                            'image url' => $imgUrl,
+                            'stock' => $this->getQty($product),
+                            'price' => number_format($price, 2, '.', ''),
+                            'sale price' => number_format($salePrice, 2, '.', ''),
+                            'brand' => $brand,
+                            'category' => end($extra_data['categories']),
+                            'extra data' => json_encode($extra_data, JSON_UNESCAPED_SLASHES)
+                        ), ',', '"');
+                    }
+                    // if ($currentPage === 10) {
+                    //    $currentPage = $pages;
+                    // }
+
+                    $currentPage++;
+                    $_productCollection->clear();
+                } while ($currentPage <= $pages);
+
+                fclose($outstream);
+
+                if(!copy($files['tmp'][0], $files['static'][0]))
+                {
+                    $errors = error_get_last();
+                    $myfile = fopen($dir . '/errorRTG.log', "w+") or die("Unable to open file!");
+                    fwrite($myfile, "COPY ERROR: ".$errors['type']);
+                    fwrite($myfile, "<br />\n".$errors['message']);
+                    fwrite($myfile, "<br />\n".json_encode($errors));
+                    fclose($myfile);
+                }
+                unlink($files['tmp'][0]);
+            } catch (Exception $e) {
+                $myfile = fopen($dir . '/errorRTG.log', "w+") or die("Unable to open file!");
+                fwrite($myfile, $e->getMessage());
+                fwrite($myfile, $e->getTraceAsString());
+                fclose($myfile);
+            }
         }
     }
 
