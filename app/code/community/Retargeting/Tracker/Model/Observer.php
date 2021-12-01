@@ -63,9 +63,9 @@ class Retargeting_Tracker_Model_Observer
             ini_set('display_errors', '1');
             error_reporting(E_ALL);
 
-            ini_set('max_execution_time', 8200);//3600);
+            ini_set('max_execution_time', 12600);//3600);
             ini_set('memory_limit', '8G');
-            set_time_limit(8200);
+            set_time_limit(12600);
             
             //header("Content-Disposition: attachment; filename=retargeting.csv");
             //header("Content-type: text/csv");
