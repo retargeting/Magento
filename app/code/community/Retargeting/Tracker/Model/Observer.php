@@ -208,9 +208,15 @@ class Retargeting_Tracker_Model_Observer
                             'extra data' => json_encode($extra_data, JSON_UNESCAPED_SLASHES)
                         ), ',', '"');
                     }
-                    // if ($currentPage === 10) {
-                    //    $currentPage = $pages;
-                    // }
+                    /*
+                    if ($currentPage >== 10) {
+                        $pages = $currentPage;
+                    }
+
+                    if ($prod >= 25000) {
+                        $pages = $currentPage;
+                    }
+                    */
 
                     $currentPage++;
                     $_productCollection->clear();
