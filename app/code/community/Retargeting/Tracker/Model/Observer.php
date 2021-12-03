@@ -102,9 +102,21 @@ class Retargeting_Tracker_Model_Observer
             try{
                 $_productCollection = Mage::getModel('catalog/product')->getCollection();
                 $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','visibility','status'));
-                $_productCollection->addFieldToFilter( 'visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH );
-                $_productCollection->addAttributeToFilter( 'status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED );
+                $_productCollection->addFieldToFilter('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
+                $_productCollection->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+                
+                $_productCollection->addAttributeToFilter('type_id', array('in' =>
+                    array(
+                        Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE,
+                        Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+                    )
+                );
+                
+                //$_productCollection->setOrder('id','ASC');
+                //$_productCollection->addAttributeToSort('id','ASC');
 
+                //$_productCollection->addAttributeToFilter('type_id', Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE
+                
                 $_productCollection->setPageSize(100);
 
                 $pages = $_productCollection->getLastPageNumber();
