@@ -137,7 +137,9 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                 foreach($categories as $categoryId) {
                     $category = Mage::getModel('catalog/category')->load($categoryId);
-                    $extra_data['categories'][$categoryId] = $category->getName();
+                    if (!empty($category->getName())) {
+                        $extra_data['categories'][$categoryId] = $category->getName();
+                    }
                 }
 
                 if (empty($extra_data['categories'])) {
