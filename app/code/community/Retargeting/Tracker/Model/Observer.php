@@ -48,20 +48,19 @@ class Retargeting_Tracker_Model_Observer
     {
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $path;
     }
-
-    public static $cronFeed = false;
     
     public function feedgen($schedule = null)
     {
-        if (self::$cronFeed) {
+        if (!empty(Mage::getStoreConfig('retargetingtracker_options/more/cronfeed'))) {
         /*
         <Files *retargeting.csv>
             order allow,deny
             allow from all
         </Files>
+        
+        ini_set('display_errors', '1');
+        error_reporting(E_ALL);
         */
-            ini_set('display_errors', '1');
-            error_reporting(E_ALL);
 
             ini_set('max_execution_time', 12600);//3600);
             ini_set('memory_limit', '8G');
@@ -239,7 +238,7 @@ class Retargeting_Tracker_Model_Observer
                 if(!copy($files['tmp'][0], $files['static'][0]))
                 {
                     $errors = error_get_last();
-                    $myfile = fopen($dir . '/errorRTG.log', "w+") or die("Unable to open file!");
+                    $myfile = fopen(Mage::getBaseDir('base'). '/RTG.log', "w+") or die("Unable to open file!");
                     fwrite($myfile, "COPY ERROR: ".$errors['type']);
                     fwrite($myfile, "<br />\n".$errors['message']);
                     fwrite($myfile, "<br />\n".json_encode($errors));
@@ -247,7 +246,7 @@ class Retargeting_Tracker_Model_Observer
                 }
                 unlink($files['tmp'][0]);
             } catch (Exception $e) {
-                $myfile = fopen($dir . '/errorRTG.log', "w+") or die("Unable to open file!");
+                $myfile = fopen(Mage::getBaseDir('base'). '/RTG.log', "w+") or die("Unable to open file!");
                 fwrite($myfile, $e->getMessage());
                 fwrite($myfile, $e->getTraceAsString());
                 fclose($myfile);
