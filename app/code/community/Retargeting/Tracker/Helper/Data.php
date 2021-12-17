@@ -129,8 +129,10 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function prepareImg($product)
     {
-        $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
+        return Mage::getModel('catalog/product_media_config')->getMediaUrl($product->getImage());
         
+        $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
+
         if ($this->delete === null) {
             $exp = explode("/",$imgUrl);
             $start = false;
@@ -148,7 +150,6 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
                 }
             }
         }
-
         return str_replace($this->delete, "", $imgUrl);
     }
 

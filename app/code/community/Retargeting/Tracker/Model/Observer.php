@@ -16,6 +16,8 @@ class Retargeting_Tracker_Model_Observer
     
     public function prepareImg($product)
     {
+        return Mage::getModel('catalog/product_media_config')->getMediaUrl($product->getImage());
+        
         $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
 
         if ($this->delete === null) {
