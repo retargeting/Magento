@@ -195,11 +195,14 @@ class Retargeting_Tracker_Model_Observer
                             $products = $productType->getUsedProducts(null, $product);
 
                             foreach ($products as $p) {
+
+                                $productQty = $this->getQty($p);
+                                
                                 $extra_data['variations'][] = [
                                     'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
                                     'price' => number_format($price, 2),
                                     'sale_price' => number_format($salePrice, 2),
-                                    'stock' => $this->getQty($p),
+                                    'stock' => $productQty < 0 ? 0 : $productQty,
                                     'size' => $p->getAttributeText('size'),
                                     'color' => $p->getAttributeText('color')
                                 ];
@@ -207,13 +210,15 @@ class Retargeting_Tracker_Model_Observer
                         }
 
                         $brand = '';
+
+                        $productQty = $this->getQty($product);
                         
                         fputcsv($outstream, array(
                             'product id' => $product->getId(),
                             'product name' => $product->getName(),
                             'product url' => $productURL,
                             'image url' => $imgUrl,
-                            'stock' => $this->getQty($product),
+                            'stock' => $productQty < 0 ? 0 : $productQty,
                             'price' => number_format($price, 2, '.', ''),
                             'sale price' => number_format($salePrice, 2, '.', ''),
                             'brand' => $brand,

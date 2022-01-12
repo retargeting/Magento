@@ -165,13 +165,14 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 $salePrice = empty((float) $finalPrice) ? $price : $finalPrice;
                 
                 $brand = '';
+                $productQty = $this->getQty($product);
                 
                 fputcsv($outstream, array(
                     'product id' => $product->getId(),
                     'product name' => $product->getName(),
                     'product url' => $productURL,
                     'image url' => $imgUrl,
-                    'stock' => $this->getQty($product),
+                    'stock' => $productQty < 0 ? 0 : $productQty,
                     'price' => number_format($price, 2, '.', ''),
                     'sale price' => number_format($salePrice, 2, '.', ''),
                     'brand' => $brand,
