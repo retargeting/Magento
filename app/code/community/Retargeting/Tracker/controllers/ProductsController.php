@@ -159,7 +159,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 $productQty = $this->getQty($product);
 
                 if( "no_selection" === $imgUrl ||
-                    // empty($productQty) ||
+                    empty($productQty) ||
                     empty($imgUrl) ||
                     empty((float) $price) || !filter_var($productURL, FILTER_VALIDATE_URL)){
                     continue;
