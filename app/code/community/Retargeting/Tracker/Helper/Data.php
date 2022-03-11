@@ -140,6 +140,29 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
         return str_replace($this->delete, "", $imgUrl);
     }
 
+    private $delete = null;
+    public function getFromCache($imgUrl = null)
+    {
+        if ($this->delete === null) {
+            $exp = explode("/",$imgUrl);
+            $start = false;
+            $count = 0;
+            $this->delete = '';
+            foreach ($exp as $k => $v) {
+                if ($v === "cache") {
+                    $start = true;
+                }
+                if ($start) {
+                    $count++;
+                    if ($count <= 5){
+                        $this->delete .= '/'.$v;
+                    }
+                }
+            }
+        }
+        return str_replace($this->delete, "", $imgUrl);
+    }
+
     /**
      * @param Mage_Catalog_Model_Product $product
      * @return array
