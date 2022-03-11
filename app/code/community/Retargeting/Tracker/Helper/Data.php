@@ -119,8 +119,20 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     private $delete = null;
-    public function getFromCache($imgUrl = null)
+
+    /*
+     * 
+     *
+     * @param mixed $product
+     * @return string
+     * */
+
+    public function prepareImg($product)
     {
+        return Mage::getModel('catalog/product_media_config')->getMediaUrl($product->getImage());
+        
+        $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
+
         if ($this->delete === null) {
             $exp = explode("/",$imgUrl);
             $start = false;
