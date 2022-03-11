@@ -182,7 +182,6 @@ class Retargeting_Tracker_Model_Observer
                         $price = $product->getPrice();
 
                         $productQty = $this->getQty($product);
-                        $productQty = $productQty < 0 ? 0 : $productQty;
 
                         if( "no_selection" === $imgUrl ||
                             // empty($productQty) ||
