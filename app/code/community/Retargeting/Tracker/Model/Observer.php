@@ -196,16 +196,23 @@ class Retargeting_Tracker_Model_Observer
 
                             foreach ($products as $p) {
 
-                                $productQty = $this->getQty($p);
-                                
-                                $extra_data['variations'][] = [
-                                    'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
-                                    'price' => number_format($price, 2),
-                                    'sale_price' => number_format($salePrice, 2),
-                                    'stock' => $productQty < 0 ? 0 : $productQty,
-                                    'size' => $p->getAttributeText('size'),
-                                    'color' => $p->getAttributeText('color')
-                                ];
+                                $vPrice = $product->getPrice();
+                                if (!empty((float) $vPrice)) {
+                                    
+                                    $vFinalPrice = $product->getFinalPrice();
+                                    $vSalePrice = empty((float) $vFinalPrice) ? $vPrice : $vFinalPrice;
+
+                                    $productQty = $this->getQty($p);
+
+                                    $extra_data['variations'][] = [
+                                        'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
+                                        'price' => number_format((float) $vPrice, 2, '.', ''),
+                                        'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
+                                        'stock' => $productQty < 0 ? 0 : $productQty,
+                                        'size' => $p->getAttributeText('size'),
+                                        'color' => $p->getAttributeText('color')
+                                    ];
+                                }
                             }
                         }
 

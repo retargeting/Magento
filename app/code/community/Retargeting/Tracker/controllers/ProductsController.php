@@ -114,11 +114,14 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         if (!empty((float) $vPrice)) {
                             $vFinalPrice = $product->getFinalPrice();
                             $vSalePrice = empty((float) $vFinalPrice) ? $vPrice : $vFinalPrice;
+
+                            $productQty = $this->getQty($p);
+
                             $extra_data['variations'][] = [
                                 'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
-                                'price' => number_format($vPrice, 2),
-                                'sale_price' => number_format($vSalePrice, 2),
-                                'stock' => $this->getQty($p),
+                                'price' => number_format((float) $vPrice, 2, '.', ''),
+                                'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
+                                'stock' => $productQty < 0 ? 0 : $productQty,
                                 'size' => $p->getAttributeText('size'),
                                 'color' => $p->getAttributeText('color')
                             ];
