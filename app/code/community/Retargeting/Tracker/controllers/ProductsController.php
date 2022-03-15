@@ -114,15 +114,23 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         if (!empty((float) $vPrice)) {
                             $vFinalPrice = $product->getFinalPrice();
                             $vSalePrice = empty((float) $vFinalPrice) ? $vPrice : $vFinalPrice;
-                            $pQty = $this->getQty($p);
-                               
+
+                            $productQty = $this->getQty($p);
+
+                            $attr = [
+                                'color' => $this->getAttributeText('color', $p),
+                                'size'=>$this->getAttributeText('size', $p)
+                            ];
+
+                            $attr['code'] = sprintf("%s-%s", $attr['color'], $attr['size']);
+
                             $extra_data['variations'][] = [
-                                'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
-                                'price' => number_format($vPrice, 2),
-                                'sale_price' => number_format($vSalePrice, 2),
-                                'stock' => $pQty < 0 ? 0 : $pQty,
-                                'size' => $p->getAttributeText('size'),
-                                'color' => $p->getAttributeText('color')
+                                'code' => $attr['code'] !== '-' ? $attr['code'] : $p->getId(),
+                                'price' => number_format((float) $vPrice, 2, '.', ''),
+                                'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
+                                'stock' => $productQty < 0 ? 0 : $productQty,
+                                'size' => $attr['size'],
+                                'color' => $attr['color']
                             ];
                         }
                     }
@@ -156,8 +164,6 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                 $price = $product->getPrice();
 
-                $productQty = $this->getQty($product);
-
                 if( "no_selection" === $imgUrl ||
                     empty($productQty) ||
                     empty($imgUrl) ||
@@ -170,13 +176,14 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 $salePrice = empty((float) $finalPrice) ? $price : $finalPrice;
                 
                 $brand = '';
+                $productQty = $this->getQty($product);
                 
                 fputcsv($outstream, array(
                     'product id' => $product->getId(),
                     'product name' => $product->getName(),
                     'product url' => $productURL,
                     'image url' => $imgUrl,
-                    'stock' => $productQty,
+                    'stock' => $productQty < 0 ? 0 : $productQty,
                     'price' => number_format($price, 2, '.', ''),
                     'sale price' => number_format($salePrice, 2, '.', ''),
                     'brand' => $brand,
@@ -189,6 +196,17 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
             $_productCollection->clear();
         } while ($currentPage <= $pages);
 
+    }
+
+    public function getAttributeText($attributeCode, $p)
+    {
+        if (!$p->getResource()->getAttribute($attributeCode)) { 
+            return '';
+        }
+        return $p->getResource()
+            ->getAttribute($attributeCode)
+                ->getSource()
+                    ->getOptionText($p->getData($attributeCode));
     }
 
     protected function getQty(Mage_Catalog_Model_Product $product)

@@ -181,8 +181,6 @@ class Retargeting_Tracker_Model_Observer
                         $productURL = $this->buildProductUrl($product->geturlpath());
                         $price = $product->getPrice();
 
-                        $productQty = $this->getQty($product);
-
                         if( "no_selection" === $imgUrl ||
                             empty($productQty) ||
                             empty($imgUrl) ||
@@ -199,28 +197,43 @@ class Retargeting_Tracker_Model_Observer
 
                             foreach ($products as $p) {
 
-                                $pQty = $this->getQty($p);
-                                
-                                $extra_data['variations'][] = [
-                                    'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
-                                    'price' => number_format($price, 2),
-                                    'sale_price' => number_format($salePrice, 2),
-                                    'stock' => $pQty < 0 ? 0 : $pQty,
-                                    'size' => $p->getAttributeText('size'),
-                                    'color' => $p->getAttributeText('color')
-                                ];
+                                $vPrice = $product->getPrice();
+                                if (!empty((float) $vPrice)) {
+                                    
+                                    $vFinalPrice = $product->getFinalPrice();
+                                    $vSalePrice = empty((float) $vFinalPrice) ? $vPrice : $vFinalPrice;
+
+                                    $productQty = $this->getQty($p);
+
+                                    $attr = [
+                                        'color' => $this->getAttributeText('color', $p),
+                                        'size'=>$this->getAttributeText('size', $p)
+                                    ];
+        
+                                    $attr['code'] = sprintf("%s-%s", $attr['color'], $attr['size']);
+        
+                                    $extra_data['variations'][] = [
+                                        'code' => $attr['code'] !== '-' ? $attr['code'] : $p->getId(),
+                                        'price' => number_format((float) $vPrice, 2, '.', ''),
+                                        'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
+                                        'stock' => $productQty < 0 ? 0 : $productQty,
+                                        'size' => $attr['size'],
+                                        'color' => $attr['color']
+                                    ];
+                                }
                             }
                         }
 
                         $brand = '';
 
+                        $productQty = $this->getQty($product);
                         
                         fputcsv($outstream, array(
                             'product id' => $product->getId(),
                             'product name' => $product->getName(),
                             'product url' => $productURL,
                             'image url' => $imgUrl,
-                            'stock' => $productQty,
+                            'stock' => $productQty < 0 ? 0 : $productQty,
                             'price' => number_format($price, 2, '.', ''),
                             'sale price' => number_format($salePrice, 2, '.', ''),
                             'brand' => $brand,
@@ -261,6 +274,17 @@ class Retargeting_Tracker_Model_Observer
                 fclose($myfile);
             }
         }
+    }
+
+    public function getAttributeText($attributeCode, $p)
+    {
+        if (!$p->getResource()->getAttribute($attributeCode)) { 
+            return '';
+        }
+        return $p->getResource()
+            ->getAttribute($attributeCode)
+                ->getSource()
+                    ->getOptionText($p->getData($attributeCode));
     }
 
     protected function getQty(Mage_Catalog_Model_Product $product)
