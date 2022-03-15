@@ -50,39 +50,16 @@ class Retargeting_Tracker_Model_Observer
     {
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $path;
     }
-    
+    private $defStock = 0;
     public function feedgen($schedule = null)
     {
         if (!empty(Mage::getStoreConfig('retargetingtracker_options/more/cronfeed'))) {
-        /*
-        <Files *retargeting.csv>
-            order allow,deny
-            allow from all
-        </Files>
-        
-        ini_set('display_errors', '1');
-        error_reporting(E_ALL);
-        */
+           $this->defStock = Mage::getStoreConfig('retargetingtracker_options/more/defaultstock') ?? 0;
 
             ini_set('max_execution_time', 12600);//3600);
             ini_set('memory_limit', '8G');
             set_time_limit(12600);
             
-            //header("Content-Disposition: attachment; filename=retargeting.csv");
-            //header("Content-type: text/csv");
-            //$link = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
-            //echo $dir;
-            //die();
-            //$websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
-            //$mgV = (float) Mage::getVersion();
-
-            //copy($files['tmp'][0], $files['static'][0]);
-            //chmod( $files['static'][0], 777);
-
-            //chmod($files['static'][0], 777);
-
-            //throw new Exception(Mage::helper('cron')->__('Unable to save This Cron Job'));
-
             $dir = Mage::getBaseDir('base').'/app/code/community/Retargeting/Tracker/Feed';
             
             $name = date('m_d_Y_H_i_s');
@@ -113,16 +90,11 @@ class Retargeting_Tracker_Model_Observer
                     )
                 );
                 
-                //$_productCollection->setOrder('id','ASC');
-                //$_productCollection->addAttributeToSort('id','ASC');
-
-                //$_productCollection->addAttributeToFilter('type_id', Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE
-                
                 $_productCollection->setPageSize(100);
 
                 $pages = $_productCollection->getLastPageNumber();
                 $currentPage = 1;
-                // chmod( $files['tmp'][0], 777);
+
                 $outstream = fopen($files['tmp'][0], $files['tmp'][1]) or die('fail to create file ' .$files['tmp'][0].' - '. $files['tmp'][1] );
 
                 fputcsv($outstream, array(
@@ -150,61 +122,36 @@ class Retargeting_Tracker_Model_Observer
                             'variations' => [],
                             'margin' => null
                         ];
-
+        
                         $product = Mage::getModel('catalog/product')->load($_product->getId());
-
-                        if(isset($product->media_gallery['images'])) {
-                            foreach ($product->media_gallery['images'] as $img) {
-                                if($img['disabled'] != '0') {
-                                    continue;
-                                }
-                                $extra_data['media_gallery'][] = $this->buildImageUrl($img['file']);
-                            }
-                        }
-
-                        $categories = $product->getCategoryIds();
-
-                        foreach($categories as $categoryId) {
-                            $category = Mage::getModel('catalog/category')
-                                ->setStoreId($storeId)
-                                ->load($categoryId);
-                            if (!empty($category->getName())) {
-                                $extra_data['categories'][$categoryId] = $category->getName();
-                            }
-                        }
-
-                        if (empty($extra_data['categories'])) {
-                            $extra_data['categories']['root'] = 'Root';
-                        }
-
+        
                         $imgUrl = $this->prepareImg($product);
+        
                         $productURL = $this->buildProductUrl($product->geturlpath());
+        
                         $price = $product->getPrice();
-
+        
+                        $productQty = $this->getQty($product);
+                        
                         if( "no_selection" === $imgUrl ||
                             empty($productQty) ||
                             empty($imgUrl) ||
                             empty((float) $price) || !filter_var($productURL, FILTER_VALIDATE_URL)){
                             continue;
                         }
-                        $finalPrice = $product->getFinalPrice();
-
-                        $salePrice = empty((float) $finalPrice) ? $price : $finalPrice;
-
+        
                         if($product->getTypeId() == 'configurable') {
                             $productType = Mage::getModel('catalog/product_type_configurable');
                             $products = $productType->getUsedProducts(null, $product);
-
+        
                             foreach ($products as $p) {
-
                                 $vPrice = $product->getPrice();
                                 if (!empty((float) $vPrice)) {
-                                    
                                     $vFinalPrice = $product->getFinalPrice();
                                     $vSalePrice = empty((float) $vFinalPrice) ? $vPrice : $vFinalPrice;
-
-                                    $productQty = $this->getQty($p);
-
+        
+                                    $qty = $this->getQty($p);
+        
                                     $attr = [
                                         'color' => $this->getAttributeText('color', $p),
                                         'size'=>$this->getAttributeText('size', $p)
@@ -216,24 +163,48 @@ class Retargeting_Tracker_Model_Observer
                                         'code' => $attr['code'] !== '-' ? $attr['code'] : $p->getId(),
                                         'price' => number_format((float) $vPrice, 2, '.', ''),
                                         'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
-                                        'stock' => $productQty < 0 ? 0 : $productQty,
+                                        'stock' => $qty,
                                         'size' => $attr['size'],
                                         'color' => $attr['color']
                                     ];
                                 }
                             }
                         }
-
+        
+                        if(isset($product->media_gallery['images'])) {
+                            foreach ($product->media_gallery['images'] as $img) {
+                                if($img['disabled'] != '0') {
+                                    continue;
+                                }
+                                $extra_data['media_gallery'][] = $this->buildImageUrl($img['file']);
+                            }
+                        }
+        
+                        $categories = $product->getCategoryIds();
+        
+                        foreach($categories as $categoryId) {
+                            $category = Mage::getModel('catalog/category')->load($categoryId);
+                            if (!empty($category->getName())) {
+                                $extra_data['categories'][$categoryId] = $category->getName();
+                            }
+                        }
+        
+                        if (empty($extra_data['categories'])) {
+                            $extra_data['categories']['root'] = 'Root';
+                        }
+                        
+                        $finalPrice = $product->getFinalPrice();
+        
+                        $salePrice = empty((float) $finalPrice) ? $price : $finalPrice;
+                        
                         $brand = '';
-
-                        $productQty = $this->getQty($product);
                         
                         fputcsv($outstream, array(
                             'product id' => $product->getId(),
                             'product name' => $product->getName(),
                             'product url' => $productURL,
                             'image url' => $imgUrl,
-                            'stock' => $productQty < 0 ? 0 : $productQty,
+                            'stock' => $productQty,
                             'price' => number_format($price, 2, '.', ''),
                             'sale price' => number_format($salePrice, 2, '.', ''),
                             'brand' => $brand,
@@ -327,7 +298,7 @@ class Retargeting_Tracker_Model_Observer
                 break;
         }
         if($qty < 0) {
-            return 0;
+            return $this->defStock;
         }
         return $qty;
     }

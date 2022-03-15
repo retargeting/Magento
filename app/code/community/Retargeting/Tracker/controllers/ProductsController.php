@@ -48,10 +48,11 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $path;
     }
 
-    public function indexAction()
-    {
-        //ini_set('display_errors', '1');
-        //error_reporting(E_ALL);
+    private $defStock = 0;
+
+    public function indexAction() {
+
+        $this->defStock = Mage::getStoreConfig('retargetingtracker_options/more/defaultstock') ?? 0;
 
         ini_set('max_execution_time', 3600);
         ini_set('memory_limit', '8G');
@@ -60,11 +61,6 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
         header("Content-Disposition: attachment; filename=retargeting.csv");
         header("Content-type: text/csv; charset=utf-8");
-
-        //$storeId = Mage::app()->getStore()->getId();
-        //$websiteId = Mage::app()->getStore($storeId)->getWebsiteId();
-        
-        //$mgV = (float) Mage::getVersion();
 
         $_productCollection = Mage::getModel('catalog/product')->getCollection();
         $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','visibility','status'));
@@ -105,6 +101,21 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                 $product = Mage::getModel('catalog/product')->load($_product->getId());
 
+                $imgUrl = $this->prepareImg($product);
+
+                $productURL = $this->buildProductUrl($product->geturlpath());
+
+                $price = $product->getPrice();
+
+                $productQty = $this->getQty($product);
+                
+                if( "no_selection" === $imgUrl ||
+                    empty($productQty) ||
+                    empty($imgUrl) ||
+                    empty((float) $price) || !filter_var($productURL, FILTER_VALIDATE_URL)){
+                    continue;
+                }
+
                 if($product->getTypeId() == 'configurable') {
                     $productType = Mage::getModel('catalog/product_type_configurable');
                     $products = $productType->getUsedProducts(null, $product);
@@ -115,7 +126,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                             $vFinalPrice = $product->getFinalPrice();
                             $vSalePrice = empty((float) $vFinalPrice) ? $vPrice : $vFinalPrice;
 
-                            $productQty = $this->getQty($p);
+                            $qty = $this->getQty($p);
 
                             $attr = [
                                 'color' => $this->getAttributeText('color', $p),
@@ -128,7 +139,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                                 'code' => $attr['code'] !== '-' ? $attr['code'] : $p->getId(),
                                 'price' => number_format((float) $vPrice, 2, '.', ''),
                                 'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
-                                'stock' => $productQty < 0 ? 0 : $productQty,
+                                'stock' => $qty,
                                 'size' => $attr['size'],
                                 'color' => $attr['color']
                             ];
@@ -157,33 +168,19 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 if (empty($extra_data['categories'])) {
                     $extra_data['categories']['root'] = 'Root';
                 }
-
-                $imgUrl = $this->prepareImg($product);
-
-                $productURL = $this->buildProductUrl($product->geturlpath());
-
-                $price = $product->getPrice();
-
-                if( "no_selection" === $imgUrl ||
-                    empty($productQty) ||
-                    empty($imgUrl) ||
-                    empty((float) $price) || !filter_var($productURL, FILTER_VALIDATE_URL)){
-                    continue;
-                }
                 
                 $finalPrice = $product->getFinalPrice();
 
                 $salePrice = empty((float) $finalPrice) ? $price : $finalPrice;
                 
                 $brand = '';
-                $productQty = $this->getQty($product);
                 
                 fputcsv($outstream, array(
                     'product id' => $product->getId(),
                     'product name' => $product->getName(),
                     'product url' => $productURL,
                     'image url' => $imgUrl,
-                    'stock' => $productQty < 0 ? 0 : $productQty,
+                    'stock' => $productQty,
                     'price' => number_format($price, 2, '.', ''),
                     'sale price' => number_format($salePrice, 2, '.', ''),
                     'brand' => $brand,
@@ -249,7 +246,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 break;
         }
         if($qty < 0) {
-            return 0;
+            return $this->defStock;
         }
         return $qty;
     }
