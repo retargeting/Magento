@@ -181,7 +181,10 @@ class Retargeting_Tracker_Model_Observer
                         $productURL = $this->buildProductUrl($product->geturlpath());
                         $price = $product->getPrice();
 
+                        $productQty = $this->getQty($product);
+
                         if( "no_selection" === $imgUrl ||
+                            empty($productQty) ||
                             empty($imgUrl) ||
                             empty((float) $price) || !filter_var($productURL, FILTER_VALIDATE_URL)){
                             continue;
@@ -196,36 +199,28 @@ class Retargeting_Tracker_Model_Observer
 
                             foreach ($products as $p) {
 
-                                $vPrice = $product->getPrice();
-                                if (!empty((float) $vPrice)) {
-                                    
-                                    $vFinalPrice = $product->getFinalPrice();
-                                    $vSalePrice = empty((float) $vFinalPrice) ? $vPrice : $vFinalPrice;
-
-                                    $productQty = $this->getQty($p);
-
-                                    $extra_data['variations'][] = [
-                                        'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
-                                        'price' => number_format((float) $vPrice, 2, '.', ''),
-                                        'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
-                                        'stock' => $productQty < 0 ? 0 : $productQty,
-                                        'size' => $p->getAttributeText('size'),
-                                        'color' => $p->getAttributeText('color')
-                                    ];
-                                }
+                                $pQty = $this->getQty($p);
+                                
+                                $extra_data['variations'][] = [
+                                    'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
+                                    'price' => number_format($price, 2),
+                                    'sale_price' => number_format($salePrice, 2),
+                                    'stock' => $pQty < 0 ? 0 : $pQty,
+                                    'size' => $p->getAttributeText('size'),
+                                    'color' => $p->getAttributeText('color')
+                                ];
                             }
                         }
 
                         $brand = '';
 
-                        $productQty = $this->getQty($product);
                         
                         fputcsv($outstream, array(
                             'product id' => $product->getId(),
                             'product name' => $product->getName(),
                             'product url' => $productURL,
                             'image url' => $imgUrl,
-                            'stock' => $productQty < 0 ? 0 : $productQty,
+                            'stock' => $productQty,
                             'price' => number_format($price, 2, '.', ''),
                             'sale price' => number_format($salePrice, 2, '.', ''),
                             'brand' => $brand,

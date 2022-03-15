@@ -114,14 +114,13 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                         if (!empty((float) $vPrice)) {
                             $vFinalPrice = $product->getFinalPrice();
                             $vSalePrice = empty((float) $vFinalPrice) ? $vPrice : $vFinalPrice;
-
-                            $productQty = $this->getQty($p);
-
+                            $pQty = $this->getQty($p);
+                               
                             $extra_data['variations'][] = [
                                 'code' => sprintf("%s-%s", $p->getAttributeText('color'), $p->getAttributeText('size') ),
-                                'price' => number_format((float) $vPrice, 2, '.', ''),
-                                'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
-                                'stock' => $productQty < 0 ? 0 : $productQty,
+                                'price' => number_format($vPrice, 2),
+                                'sale_price' => number_format($vSalePrice, 2),
+                                'stock' => $pQty < 0 ? 0 : $pQty,
                                 'size' => $p->getAttributeText('size'),
                                 'color' => $p->getAttributeText('color')
                             ];
@@ -157,7 +156,10 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
 
                 $price = $product->getPrice();
 
+                $productQty = $this->getQty($product);
+
                 if( "no_selection" === $imgUrl ||
+                    empty($productQty) ||
                     empty($imgUrl) ||
                     empty((float) $price) || !filter_var($productURL, FILTER_VALIDATE_URL)){
                     continue;
@@ -168,14 +170,13 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
                 $salePrice = empty((float) $finalPrice) ? $price : $finalPrice;
                 
                 $brand = '';
-                $productQty = $this->getQty($product);
                 
                 fputcsv($outstream, array(
                     'product id' => $product->getId(),
                     'product name' => $product->getName(),
                     'product url' => $productURL,
                     'image url' => $imgUrl,
-                    'stock' => $productQty < 0 ? 0 : $productQty,
+                    'stock' => $productQty,
                     'price' => number_format($price, 2, '.', ''),
                     'sale price' => number_format($salePrice, 2, '.', ''),
                     'brand' => $brand,
