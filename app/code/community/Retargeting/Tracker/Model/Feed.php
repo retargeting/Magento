@@ -178,13 +178,24 @@ class Retargeting_Tracker_Model_Feed
 
                             $attr = [
                                 'color' => $this->getAttributeText('color', $p),
-                                'size'=>$this->getAttributeText('size', $p)
+                                'size' => $this->getAttributeText('size', $p)
                             ];
 
-                            $attr['code'] = sprintf("%s-%s", $attr['color'], $attr['size']);
+                            if (!$attr['color'] || !$attr['size']) {
+                                if ($attr['color'] !== false) {
+                                    $attr['code'] = $attr['color'];
+                                } else if ($attr['size'] !== false) {
+                                    $attr['code'] = $attr['size'];
+                                } else {
+                                    $attr['code'] = $p->getId();
+                                }
+                            } else {
+                                $attr['code'] = sprintf("%s-%s", $attr['color'], $attr['size']);
+                            }
+                            
 
                             $extra_data['variations'][] = [
-                                'code' => $attr['code'] !== '-' ? $attr['code'] : $p->getId(),
+                                'code' => $attr['code'],
                                 'price' => number_format((float) $vPrice, 2, '.', ''),
                                 'sale_price' => number_format((float) $vSalePrice, 2, '.', ''),
                                 'stock' => $qty,
@@ -283,7 +294,7 @@ class Retargeting_Tracker_Model_Feed
     public function getAttributeText($attributeCode, $p)
     {
         if (!$p->getResource()->getAttribute($attributeCode)) { 
-            return '';
+            return false;
         }
         return $p->getResource()
             ->getAttribute($attributeCode)
