@@ -18,6 +18,8 @@ $add_to_cart_id = Mage::getStoreConfig('retargetingtracker_options/more/cartid')
 
 function prepareImg($product,$delete = null)
 {
+    return Mage::getModel('catalog/product_media_config')->getMediaUrl($product->getImage());
+    
     $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
     
         $exp = explode("/",$imgUrl);
