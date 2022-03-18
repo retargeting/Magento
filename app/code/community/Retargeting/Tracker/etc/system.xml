@@ -17,7 +17,7 @@
     </tabs>
     <sections>
         <retargetingtracker_options translate="label" module="retargeting_tracker">
-            <label>Retargeting Tracker Options</label>
+            <label><![CDATA[<span style="padding:0 !important;margin-left:0px;padding-top:2.5px !important;"><img style="height:30px;padding:0px;vertical-align: middle;" src="https://retargeting.biz/favicon.png" alt="Retargeting"> Retargeting Tracker Options</span>]]></label>
             <tab>retargetingconfig</tab>
             <frontend_type>text</frontend_type>
             <sort_order>1000</sort_order>
@@ -25,6 +25,23 @@
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
             <groups>
+                <tracker translate="label">
+                    <label><![CDATA[
+<script type="text/javascript">
+let elm = document.querySelectorAll('.section-config .entry-edit-head')[0];
+elm.classList.remove("collapseable");
+elm.style.backgroundColor = "#fff";
+elm.querySelector('a').removeAttribute("onclick");
+elm.querySelector('a').href = "https://retargeting.biz/";
+elm.querySelector('a').setAttribute("target", "_blank");
+</script>
+                    <img style="height:35px;margin-top:0px;margin-left:10px;" src="https://retargeting.biz/img/logos/LOGO_retargeting.svg" alt="Retargeting">]]></label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                </tracker>
                 <domain translate="label">
                     <label>Tracking API Key</label>
                     <frontend_type>text</frontend_type>
