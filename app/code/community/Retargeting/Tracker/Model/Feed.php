@@ -13,17 +13,28 @@ class Retargeting_Tracker_Model_Feed
     private $Store = 1;
 
     private function loadConfig() {
-        $this->defStock = Mage::getStoreConfig('retargetingtracker_options/more/defaultstock');
+        $this->defStock = $this->getConfig('retargetingtracker_options/more/defaultstock', 0);
 
-        $this->defStock = $this->defStock === null ? 0 : $this->defStock;
-
-        $this->Store = Mage::getStoreConfig('retargetingtracker_options/more/storeselect');
-
-        $this->Store = $this->Store === null ? 1 : $this->Store;
-
+        $this->Store = $this->getConfig('retargetingtracker_options/more/storeselect', 1);
+        
         ini_set('max_execution_time', 3600);
         ini_set('memory_limit', '8G');
         set_time_limit(0);
+    }
+
+    private function getConfig($wh = null, $val = '') {
+        if ($wh !== null) {
+            $cfg = Mage::getStoreConfig($wh);
+
+            if ($cfg === null) {
+                Mage::getModel('core/config')->saveConfig($wh, $val);
+                Mage::getModel('core/config')->cleanCache();
+            } else {
+                return $cfg;
+            }
+        }
+
+        return $val;
     }
 
     private $delete = null;

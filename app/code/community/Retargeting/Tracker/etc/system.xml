@@ -27,15 +27,20 @@
             <groups>
                 <tracker translate="label">
                     <label><![CDATA[
+                    <img id="rtgicon" style="height:35px;margin-top:0px;margin-left:10px;" src="https://retargeting.biz/img/logos/LOGO_retargeting.svg" alt="Retargeting">
 <script type="text/javascript">
-let elm = document.querySelectorAll('.section-config .entry-edit-head')[0];
-elm.classList.remove("collapseable");
-elm.style.backgroundColor = "#fff";
-elm.querySelector('a').removeAttribute("onclick");
-elm.querySelector('a').href = "https://retargeting.biz/";
-elm.querySelector('a').setAttribute("target", "_blank");
-</script>
-                    <img style="height:35px;margin-top:0px;margin-left:10px;" src="https://retargeting.biz/img/logos/LOGO_retargeting.svg" alt="Retargeting">]]></label>
+if (typeof rtgElm === "undefined") {
+    var rtgElm = document.querySelectorAll('#rtgicon')[0].parentNode.parentNode.parentNode;
+
+    rtgElm.querySelector('.collapseable').style.backgroundColor = "#fff";
+    rtgElm.querySelector('.collapseable').classList.remove("collapseable");
+
+    rtgElm.querySelector('a').removeAttribute("onclick");
+    rtgElm.querySelector('a').href = "https://retargeting.app/";
+    rtgElm.querySelector('a').setAttribute("target", "_blank");
+}
+
+</script>]]></label>
                     <frontend_type>text</frontend_type>
                     <sort_order>0</sort_order>
                     <show_in_default>1</show_in_default>
@@ -57,7 +62,7 @@ elm.querySelector('a').setAttribute("target", "_blank");
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment><![CDATA[<a href="https://retargeting.biz/admin?action=api_redirect&token=5ac66ac466f3e1ec5e6fe5a040356997">Click here</a> to get your Tracking API Key]]></comment>
+                            <comment><![CDATA[<a href="https://retargeting.app/">Click here</a> to get your Tracking API Key]]></comment>
                         </domain_api_key>
                     </fields>
                 </domain>
@@ -76,7 +81,7 @@ elm.querySelector('a').setAttribute("target", "_blank");
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment><![CDATA[<a href="https://retargeting.biz/admin?action=api_redirect&token=5ac66ac466f3e1ec5e6fe5a040356997">Click here</a> to get your REST API Key]]></comment>
+                            <comment><![CDATA[<a href="https://retargeting.app/">Click here</a> to get your REST API Key]]></comment>
                         </token>
                     </fields>
                 </token>
