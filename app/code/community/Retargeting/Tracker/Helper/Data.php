@@ -153,6 +153,26 @@ class Retargeting_Tracker_Helper_Data extends Mage_Core_Helper_Abstract
         return str_replace($this->delete, "", $imgUrl);
     }
 
+    public function getConfig($wh = null, $val = '') {
+        if ($wh !== null) {
+            $cfg = Mage::getStoreConfig($wh);
+
+            if ($cfg !== null && $val !== $cfg) {
+                return $cfg;
+            }
+            /*
+            if ($cfg === null && $val !== $cfg) {
+                Mage::getModel('core/config')->saveConfig($wh, $val);
+                Mage::getModel('core/config')->cleanCache();
+            } else {
+                return $cfg;
+            }
+            */
+        }
+
+        return $val;
+    }
+
     /**
      * @param Mage_Catalog_Model_Product $product
      * @return array

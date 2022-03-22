@@ -10,59 +10,15 @@
 class Retargeting_Tracker_Model_Feed
 {
     private $defStock = 0;
-    private $Store = 1;
+    private $Store = [1];
 
     private function loadConfig() {
-        $this->defStock = $this->getConfig('retargetingtracker_options/more/defaultstock', 0);
+        $this->defStock = Mage::helper('retargeting_tracker')->getConfig('retargetingtracker_options/more/defaultstock', 0);
 
-        $this->Store = $this->getConfig('retargetingtracker_options/more/storeselect', 1);
-        
+
         ini_set('max_execution_time', 3600);
         ini_set('memory_limit', '8G');
         set_time_limit(0);
-    }
-
-    private function getConfig($wh = null, $val = '') {
-        if ($wh !== null) {
-            $cfg = Mage::getStoreConfig($wh);
-
-            if ($cfg === null) {
-                Mage::getModel('core/config')->saveConfig($wh, $val);
-                Mage::getModel('core/config')->cleanCache();
-            } else {
-                return $cfg;
-            }
-        }
-
-        return $val;
-    }
-
-    private $delete = null;
-    
-    public function prepareImg($product)
-    {
-        return Mage::getModel('catalog/product_media_config')->getMediaUrl($product->getImage());
-        
-        $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
-
-        if ($this->delete === null) {
-            $exp = explode("/",$imgUrl);
-            $start = false;
-            $count = 0;
-            $this->delete = '';
-            foreach ($exp as $k => $v) {
-                if ($v === "cache") {
-                    $start = true;
-                }
-                if ($start) {
-                    $count++;
-                    if ($count <= 5){
-                        $this->delete .= '/'.$v;
-                    }
-                }
-            }
-        }
-        return str_replace($this->delete, "", $imgUrl);
     }
 
     protected function buildImageUrl($path)
@@ -77,20 +33,42 @@ class Retargeting_Tracker_Model_Feed
     }
 
     public function cronFeed() {
-        return $this->generateFeed(null, 1, 100, false);
+
+        $this->loadConfig();
+
+        $this->Store = Mage::helper('retargeting_tracker')->getConfig('retargetingtracker_options/more/storeselect', [1]);
+
+        $this->Store = explode(',', $this->Store);
+
+        foreach ($this->Store as $storeID) {
+           $last = $this->generateFeed(null, 1, 100, false, false, $storeID);
+        }
+
+        return $last;
     }
 
     public function staticFeed() {
+
+        $this->loadConfig();
         return $this->generateFeed(null, 1, 100, true, true);
     }
 
-    public function generateFeed($file = null, $currentPage = 1, $size = 100, $notCron = true, $static = false) {
-
+    public function genFeed() {
+        
         $this->loadConfig();
-    
+
+        return $this->generateFeed();
+    }
+
+    public function generateFeed($file = null, $currentPage = 1, $size = 100, $notCron = true, $static = false, $storeID = null) {
+
+        if ($storeID === null) {
+            $storeID = Mage::app()->getStore()->getStoreId();
+        }
+
         if ($file === null) {
             $file = [
-                'name' => 'retargeting',
+                'name' => 'retargeting.'. $storeID,
                 'tmpName' => 'retargeting.'.time(),
                 'path' => Mage::getBaseDir('base').'/app/code/community/Retargeting/Tracker/Feed'
             ];
@@ -107,8 +85,9 @@ class Retargeting_Tracker_Model_Feed
         $_productCollection = Mage::getModel('catalog/product')->getCollection();
         $_productCollection->addAttributeToSelect(array('id', 'name', 'url_path', 'image', 'price', 'specialprice','stock','visibility','status'));
         $_productCollection->addFieldToFilter('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
-        $_productCollection->addStoreFilter($this->Store);
         $_productCollection->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+
+        $_productCollection->addStoreFilter($storeID);
 
         $_productCollection->setPageSize($size);
 
@@ -159,7 +138,7 @@ class Retargeting_Tracker_Model_Feed
 
                 $product = Mage::getModel('catalog/product')->load($_product->getId());
 
-                $imgUrl = $this->prepareImg($product);
+                $imgUrl = Mage::helper('retargeting_tracker')->prepareImg($product);
 
                 $productURL = $this->buildProductUrl($product->geturlpath());
 
@@ -275,6 +254,7 @@ class Retargeting_Tracker_Model_Feed
             $currentPage++;
             $_productCollection->clear();
         } while ($currentPage <= $pages);
+
         fclose($outstream);
 
         if ($notCron) {
@@ -282,9 +262,10 @@ class Retargeting_Tracker_Model_Feed
         }
 
         try {
+            
             copy(
                 $file['path'].'/'.$file['tmpName'].'.csv',
-                $file['path'].'/'.$file['name'].'.csv'
+                $file['path'].'/'.$file['name'] .'.csv'
             );
 
             unlink($file['path'].'/'.$file['tmpName'].'.csv');
@@ -294,11 +275,13 @@ class Retargeting_Tracker_Model_Feed
             $status['status'] = 'readProblem';
             $status['message'] = $e->getMessage();
         }
+
         /*if (!$notCron) {
             $cron = fopen($file['path'].'/'.time().'.cron', 'w+');
             fwrite($cron, json_encode($status));
             fclose($cron);
         }*/
+        
         return $status;
     }
 

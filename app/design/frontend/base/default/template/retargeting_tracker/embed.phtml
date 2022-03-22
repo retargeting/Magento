@@ -10,15 +10,16 @@
 <script type="text/javascript">
 	<?php 
 		$ra_key = Mage::getStoreConfig('retargetingtracker_options/domain/domain_api_key');
-		$add_to_cart_id = Mage::getStoreConfig('retargetingtracker_options/more/cartid');
-		$price_label_id = Mage::getStoreConfig('retargetingtracker_options/more/pricelabelid');
+		
+		$add_to_cart_id = Mage::helper('retargeting_tracker')->getConfig('retargetingtracker_options/more/cartid', ".add-to-cart-buttons");
+		$price_label_id = Mage::helper('retargeting_tracker')->getConfig('retargetingtracker_options/more/pricelabelid', "price-box");
 	?>
-	<?php if ($ra_key && $ra_key != '') : ?>
+	<?php if (!empty($ra_key)) : ?>
 	(function(){
 	ra_key = "<?php echo $ra_key; ?>";
  	ra_params = {
-	    add_to_cart_button_id: "<?php echo empty($add_to_cart_id) ? "add-to-cart-buttons" : $add_to_cart_id; ?>",
-	    price_label_id: "<?php echo empty($price_label_id) ? "price-box" : $price_label_id; ?>",
+	    add_to_cart_button_id: "<?php echo $add_to_cart_id; ?>",
+	    price_label_id: "<?php echo $price_label_id; ?>",
 	};
 	var ra = document.createElement("script"); ra.type ="text/javascript"; ra.async = true; ra.src = ("https:" ==
 	document.location.protocol ? "https://" : "http://") + "tracking.retargeting.biz/v3/rajs/" + ra_key + ".js";

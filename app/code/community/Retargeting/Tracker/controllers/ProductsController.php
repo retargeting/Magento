@@ -14,7 +14,7 @@ class Retargeting_Tracker_ProductsController extends Mage_Core_Controller_Front_
         header("Content-Disposition: attachment; filename=retargeting.csv");
         header("Content-type: text/csv; charset=utf-8");
 
-        $result = Mage::getModel('retargeting_tracker/feed')->generateFeed();
+        $result = Mage::getModel('retargeting_tracker/feed')->genFeed();
 
         if ($result['status'] !== 'success') {
             echo json_encode($result);

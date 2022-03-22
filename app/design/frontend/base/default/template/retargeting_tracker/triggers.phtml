@@ -14,31 +14,8 @@
 ?>
 <?php
 $magentoVersion = Mage::getVersion();
-$add_to_cart_id = Mage::getStoreConfig('retargetingtracker_options/more/cartid');
+$add_to_cart_id = Mage::helper('retargeting_tracker')->getConfig('retargetingtracker_options/more/cartid', ".add-to-cart-buttons");
 
-function prepareImg($product,$delete = null)
-{
-    return Mage::getModel('catalog/product_media_config')->getMediaUrl($product->getImage());
-    
-    $imgUrl = Mage::helper('catalog/image')->init($product, 'image')->resize(500);
-    
-        $exp = explode("/",$imgUrl);
-        $start = false;
-        $count = 0;
-        $delete = '';
-        foreach ($exp as $k => $v) {
-            if ($v === "cache") {
-                $start = true;
-            }
-            if ($start) {
-                $count++;
-                if ($count <= 5){
-                    $delete .= '/'.$v;
-                }
-            }
-        }
-    return str_replace($delete, "", $imgUrl);
-}
 ?>
 
 <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
@@ -203,10 +180,8 @@ function prepareImg($product,$delete = null)
         "name": "<?php echo htmlspecialchars($_product->getName()); ?>",
         "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
         "img": "<?php echo htmlspecialchars(
-            prepareImg($_product)
-        );
-        /* Magento 1.8 */
-        /* htmlspecialchars(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $_product->getThumbnail()) */ ?>",
+            Mage::helper('retargeting_tracker')->prepareImg($_product)
+        ); ?>",
         "price": <?php echo $productPrices['price']; ?>,
         "promo": <?php echo $productPrices['promo']; ?>,
         "inventory": {
@@ -231,7 +206,7 @@ function prepareImg($product,$delete = null)
         };
 
         /* document.querySelector(".btn-cart") document.getElementsByClassName("btn-cart")[0]*/
-        document.querySelector("<?php echo empty($add_to_cart_id) ? ".add-to-cart-buttons" : $add_to_cart_id; ?>")
+        document.querySelector("<?php echo $add_to_cart_id; ?>")
             .addEventListener("click", function(){
             _ra.addToCartInfo.quantity = ( document.querySelector("#qty") ?? { value:1 } ).value;
             
@@ -318,7 +293,7 @@ function prepareImg($product,$delete = null)
         "name": "<?php echo htmlspecialchars($_product->getName()); ?>",
         "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
         "img": "<?php echo htmlspecialchars(
-            prepareImg($_product)
+            Mage::helper('retargeting_tracker')->prepareImg($_product)
         ); ?>",
         "price": <?php echo $productPrices['price']; ?>,
         "promo": <?php echo $productPrices['promo']; ?>,
