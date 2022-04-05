@@ -19,6 +19,90 @@ class Retargeting_Tracker_Model_Observer
         }
     }
 
+    private $isSubscribed = false;
+    public function subscriberStatus($observer)
+    {
+        $model = $observer->getObject();
+
+        if (!$model instanceof Mage_Newsletter_Model_Subscriber) {
+            return;
+        }
+
+        $customer = Mage::getSingleton('customer/session')->getCustomer();
+
+        $this->isSubscribed = $model->isSubscribed() == Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+
+        $this->sendSubCustomer($customer);
+    }
+
+    public function TrackRegister($observer) {
+
+        $customer = $observer->getCustomer();
+        $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail($customer->getEmail());
+
+        $this->isSubscribed = $subscriber->getStatus() == Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+        if ($this->isSubscribed) {
+            $this->sendSubCustomer($customer);
+        }
+    }
+
+    public function sendSubCustomer($customer, $info = null) {
+        if ($info === null){
+            $customerPhone = '';
+
+            $customerAddressId = $customer->getDefaultShipping();
+            if ($customerAddressId) {
+                $address = Mage::getModel('customer/address')->load($customerAddressId);
+                $customerData = $address->getData();
+                $customerPhone = $customerData['telephone'];
+            }
+
+            $info = array(
+                "email" => $customer->getEmail(),
+                "name" => $customer->getName(),
+                "phone" => $customerPhone
+            );
+        } else {
+            $info = array(
+                "email" => $info["email"],
+                "name" => $info["name"],
+                "phone" => $info["phone"]
+            );
+        }
+
+        $this->Subscriber($this->isSubscribed, $info);
+    }
+
+    private function Subscriber($isSubscribed, $info) {
+        $apiURL = "https://api.retargeting.app/v1/" . ( $isSubscribed ? "subscriber-register" : "subscriber-unsubscribe" );
+
+        $key = Mage::getStoreConfig('retargetingtracker_options/token/token');
+
+        if (empty($key)) {
+            return false;
+        }
+
+        $info['k'] = $key;
+
+        if (empty($info['phone'])){
+            unset($info['phone']);
+        }
+
+        $apiURL = $apiURL .'?'. http_build_query($info);
+
+        $curl_request = curl_init();
+        curl_setopt($curl_request, CURLOPT_CONNECTTIMEOUT, 1);
+        curl_setopt($curl_request, CURLOPT_TIMEOUT, 1);
+        curl_setopt($curl_request, CURLOPT_URL, $apiURL);
+        curl_setopt($curl_request, CURLOPT_POST, false);
+        // curl_setopt($curl_request, CURLOPT_POSTFIELDS, $api_parameters);
+        curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, false);
+        $out = curl_exec($curl_request);
+
+        return true;
+    }
+
     public function TrackSetEmail($observer)
     {
         $event = $observer->getEvent();  //Fetches the current event
@@ -41,6 +125,10 @@ class Retargeting_Tracker_Model_Observer
             "city" => $customerCity,
             "sex" => $customer->getGender()
         );
+
+        // $this->isSubscribed = $customer->getStatus() == Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+
+        // $this->sendSubCustomer($customer, $info);
 
         Mage::getSingleton('core/session')->setTriggerSetEmail($info);
     }
