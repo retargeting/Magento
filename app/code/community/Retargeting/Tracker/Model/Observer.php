@@ -107,30 +107,35 @@ class Retargeting_Tracker_Model_Observer
     {
         $event = $observer->getEvent();  //Fetches the current event
         $customer = $observer->getCustomer();
-        $customerPhone = '';
-        $customerCity = '';
 
-        $customerAddressId = $customer->getDefaultShipping();
-        if ($customerAddressId) {
-            $address = Mage::getModel('customer/address')->load($customerAddressId);
-            $customerData = $address->getData();
-            $customerPhone = $customerData['telephone'];
-            $customerCity = $customerData['city'];
+        $this->isSubscribed = $customer->getStatus() == Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+
+        if ($this->isSubscribed) {
+
+            $customerPhone = '';
+            $customerCity = '';
+
+            $customerAddressId = $customer->getDefaultShipping();
+
+            if ($customerAddressId) {
+                $address = Mage::getModel('customer/address')->load($customerAddressId);
+                $customerData = $address->getData();
+                $customerPhone = $customerData['telephone'];
+                $customerCity = $customerData['city'];
+            }
+
+            $info = array (
+                "email" => $customer->getEmail(),
+                "name" => $customer->getName(),
+                "phone" => $customerPhone,
+                "city" => $customerCity,
+                "sex" => $customer->getGender()
+            );
+
+            // $this->sendSubCustomer($customer, $info);
+
+            Mage::getSingleton('core/session')->setTriggerSetEmail( $info );
         }
-
-        $info = array(
-            "email" => $customer->getEmail(),
-            "name" => $customer->getName(),
-            "phone" => $customerPhone,
-            "city" => $customerCity,
-            "sex" => $customer->getGender()
-        );
-
-        // $this->isSubscribed = $customer->getStatus() == Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
-
-        // $this->sendSubCustomer($customer, $info);
-
-        Mage::getSingleton('core/session')->setTriggerSetEmail($info);
     }
 
     public function removeFromCart($observer)
