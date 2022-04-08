@@ -11,7 +11,7 @@
 <config>
     <modules>
         <Retargeting_Tracker>
-            <version>1.4.5</version>
+            <version>1.4.6</version>
         </Retargeting_Tracker>
     </modules>
     <crontab>
