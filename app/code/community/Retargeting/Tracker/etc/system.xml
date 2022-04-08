@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @category    Retargeting
+ * @package     Retargeting_Tracker
+ * @author      Retargeting <info@retargeting.biz>
+ * @copyright   Copyright (c) Retargeting
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+*/
+-->
+<config>
+    <tabs>
+        <retargetingconfig translate="label" module="retargeting_tracker">
+            <label>Retargeting</label>
+            <sort_order>99999</sort_order>
+        </retargetingconfig>
+    </tabs>
+    <sections>
+        <retargetingtracker_options translate="label" module="retargeting_tracker">
+            <label><![CDATA[<span style="padding:0 !important;margin-left:0px;padding-top:2.5px !important;"><img style="height:30px;padding:0px;vertical-align: middle;" src="https://retargeting.biz/favicon.png" alt="Retargeting"> Retargeting Tracker Options</span>]]></label>
+            <tab>retargetingconfig</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>1000</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <tracker translate="label">
+                    <label><![CDATA[
+                    <img id="rtgicon" style="height:35px;margin-top:0px;margin-left:10px;" src="https://retargeting.biz/img/logos/LOGO_retargeting.svg" alt="Retargeting">
+<script type="text/javascript">
+if (typeof rtgElm === "undefined") {
+    var rtgElm = document.querySelectorAll('#rtgicon')[0].parentNode.parentNode.parentNode;
+
+    rtgElm.querySelector('.collapseable').style.backgroundColor = "#fff";
+    rtgElm.querySelector('.collapseable').classList.remove("collapseable");
+
+    rtgElm.querySelector('a').removeAttribute("onclick");
+    rtgElm.querySelector('a').href = "https://retargeting.app/";
+    rtgElm.querySelector('a').setAttribute("target", "_blank");
+}
+
+</script>]]></label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                </tracker>
+                <domain translate="label">
+                    <label>Tracking API Key</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <domain_api_key>
+                            <label>Tracking API Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<a href="https://retargeting.app/">Click here</a> to get your Tracking API Key]]></comment>
+                        </domain_api_key>
+                    </fields>
+                </domain>
+                <token translate="label">
+                    <label>REST API Key</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <token>
+                            <label>REST API Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<a href="https://retargeting.app/">Click here</a> to get your REST API Key]]></comment>
+                        </token>
+                    </fields>
+                </token>
+                <information translate="label">
+                    <label>Specific URLs</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <comment><![CDATA[<script type="text/javascript">
+function copyToClipBoard(el) {
+    navigator.clipboard.writeText(el.value);
+    el.nextElementSibling.innerHTML = 'Copied';
+    el.nextElementSibling.style.display = 'block';
+    setTimeout(function () {
+        el.nextElementSibling.style.display = 'none';
+    }, 5000);
+}
+window.addEventListener('load', function () {
+    for (let i of document.querySelectorAll('#rtg_custom input')) {
+        i.value = location.protocol+'\/\/'+location.host+i.value;
+    }
+})
+</script>
+<table cellspacing="0" class="form-list" id="rtg_custom">
+    <tbody>
+        <tr>
+            <td class="label">
+                <label for="tocken">Token API URL:</label>
+            </td>
+            <td class="value">
+                <input readonly type="text" class="input-text" id="tocken" onclick="copyToClipBoard(this)" value="/retargetingtracker/discounts/addDiscountCode">
+                <span></span>
+            </td>
+        </tr>
+        <tr>
+            <td class="label">
+                <label for="feed">Products Feed URL:</label>
+            </td>
+            <td class="value">
+                <input readonly type="text" class="input-text" id="feed" onclick="copyToClipBoard(this)" value="/retargetingtracker/products">
+                <span></span>
+            </td>
+        </tr>
+        <tr>
+            <td class="label">
+                <label for="static">Products Cron Feed URL:</label>
+            </td>
+            <td class="value">
+                <input readonly type="text" class="input-text" id="static" onclick="copyToClipBoard(this)" value="/retargetingtracker/static">
+                <span></span>
+            </td>
+        </tr>
+    </tbody>
+</table>]]></comment>
+                </information>
+                <more translate="label">
+                    <label>More</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>3</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <help_pages>
+                            <label>Help Pages</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>retargeting_tracker/helppages</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </help_pages>
+                        <facebook translate="label">
+                            <label>Activate Like Facebook Function</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <!--<comment><![CDATA[likeFacebook function]]></comment>-->
+                        </facebook>
+                        <cronfeed translate="label">
+                            <label>Activate Cron Feed</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>25</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<strong>If active, please select Stores downbelow</strong>]]></comment>
+                        </cronfeed>
+                        <storeselect translate="label">
+                            <label>Select Stores</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>retargeting_tracker/stores</source_model>
+                            <sort_order>26</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<strong>Select Stores to generate static feed by Magento Cron</strong>]]></comment>
+                        </storeselect>
+                        <defaultstock translate="label">
+                            <label>Set In Stock if negative Stock</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>retargeting_tracker/defaultstock</source_model>
+                            <sort_order>27</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<strong>Default stock if stock is negative</strong>]]></comment>
+                        </defaultstock>
+                        <css translate="label">
+                            <label>Main image CSS Class</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Insert your main product image CSS Class]]></comment>
+                        </css>
+                        <cartid translate="label">
+                            <label>Add To Cart Button ID or Class</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Add To Cart Button ID or Class]]></comment>
+                        </cartid>
+                        <pricelabelid translate="label">
+                            <label>Add Price Label ID or Class</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Add Price Label ID or Class]]></comment>
+                        </pricelabelid>
+                    </fields>
+                </more>
+
+            </groups>
+        </retargetingtracker_options>
+    </sections>
+</config>

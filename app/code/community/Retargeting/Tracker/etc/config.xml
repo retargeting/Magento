@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<!--
+/**
+* @category    Retargeting
+* @package     Retargeting_Tracker
+* @author      Retargeting <info@retargeting.biz>
+* @copyright   Copyright (c) Retargeting
+* @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+*/
+-->
+<config>
+    <modules>
+        <Retargeting_Tracker>
+            <version>1.4.7</version>
+        </Retargeting_Tracker>
+    </modules>
+    <crontab>
+        <jobs>
+            <feedgen>
+                <schedule>
+                    <cron_expr>0 */4 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>retargeting_tracker/observer::feedgen</model>
+                </run>
+            </feedgen>
+        </jobs>
+    </crontab>
+    <global>
+        <blocks>
+            <retargeting_tracker>
+                <class>Retargeting_Tracker_Block</class>
+            </retargeting_tracker>
+            <retargeting_tracker_adminhtml>
+                <class>Retargeting_Tracker_Block_Adminhtml</class>
+            </retargeting_tracker_adminhtml>
+        </blocks>
+        <models>
+            <retargeting_tracker>
+                <class>Retargeting_Tracker_Model</class>
+            </retargeting_tracker>
+        </models>
+        <helpers>
+            <retargeting_tracker>
+                <class>Retargeting_Tracker_Helper</class>
+            </retargeting_tracker>
+        </helpers>
+        <events>
+            <sales_quote_remove_item>
+                <observers>
+                    <retargeting_tracker>
+                        <class>Retargeting_Tracker_Model_Observer</class>
+                        <method>removeFromCart</method>
+                    </retargeting_tracker>
+                </observers>
+            </sales_quote_remove_item>
+            <customer_login>
+                <observers>
+                    <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
+                        <method>TrackSetEmail</method>
+                    </retargeting_tracker>
+                </observers>
+            </customer_login>
+            <model_save_after>
+                <observers>
+                    <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
+                        <method>subscriberStatus</method>
+                    </retargeting_tracker>
+                </observers>
+            </model_save_after>
+            <customer_register_success>
+                <observers>
+                    <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
+                        <method>TrackRegister</method>
+                    </retargeting_tracker>
+                </observers>
+            </customer_register_success>
+            <checkout_cart_product_add_after>
+                <observers>
+                    <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
+                        <method>TrackAddToCart</method>
+                    </retargeting_tracker>
+                </observers>
+            </checkout_cart_product_add_after>
+            <wishlist_add_product>
+                <observers>
+                    <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
+                        <method>TrackAddToWishlist</method>
+                    </retargeting_tracker>
+                </observers>
+            </wishlist_add_product>
+            <review_save_after>
+                <observers>
+                    <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
+                        <method>TrackCommentOnProduct</method>
+                    </retargeting_tracker>
+                </observers>
+            </review_save_after>
+            <sales_order_place_after>
+                <observers>
+                    <retargeting_tracker><class>Retargeting_Tracker_Model_Observer</class>
+                        <method>TrackSaveOrder</method>
+                    </retargeting_tracker>
+                </observers>
+            </sales_order_place_after>
+        </events>
+    </global>
+    <frontend>
+        <routers>
+            <retargeting_tracker>
+                <use>standard</use>
+                <args>
+                    <module>Retargeting_Tracker</module>
+                    <frontName>retargetingtracker</frontName>
+                </args>
+            </retargeting_tracker>
+        </routers>
+        <layout>
+            <updates>
+                <retargeting_tracker>
+                    <file>retargeting_tracker.xml</file>
+                </retargeting_tracker>
+            </updates>
+        </layout>
+    </frontend>
+    <adminhtml>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <retargetingtracker_options>
+                                            <title>Store Retargeting Tracker Module Section</title>
+                                        </retargetingtracker_options>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+    </adminhtml>
+</config>
