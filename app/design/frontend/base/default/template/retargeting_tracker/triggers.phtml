@@ -1,0 +1,1079 @@
+<?php
+/**
+ * @category    Retargeting
+ * @package     Retargeting_Tracker
+ * @author      Retargeting <info@retargeting.biz>
+ * @copyright   Copyright (c) Retargeting
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>
+<?php
+/**
+ * Retargeting Triggers code
+ **/
+?>
+<?php
+$magentoVersion = Mage::getVersion();
+$add_to_cart_id = Mage::helper('retargeting_tracker')->getConfig('retargetingtracker_options/more/cartid', ".add-to-cart-buttons");
+
+?>
+
+<?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
+    <script>
+        // Retargeting JS helpers
+        function _ra_helper_addLoadEvent(func) {
+            var oldonload = window.onload;
+            if (typeof window.onload != 'function') {
+                window.onload = func;
+            } else {
+                window.onload = function () {
+                    if (oldonload) {
+                        oldonload();
+                    }
+                    func();
+                };
+            }
+        }
+    </script>
+<?php endif ?>
+
+<script async>
+    <?php
+    /*
+        ----------------------- Trigger setEmail -----------------------
+    */
+    ?>
+    <?php if ($info = Mage::getSingleton('core/session')->getTriggerSetEmail()) : ?>
+    // Trigger setEmail
+    var _ra = _ra || {};
+    _ra.setEmailInfo = {
+        "email": "<?php  echo htmlspecialchars($info['email']); ?>",
+        "name": "<?php  echo htmlspecialchars($info['name']); ?>",
+        "phone": "<?php  echo htmlspecialchars($info['phone']); ?>",
+        "city": "<?php  echo htmlspecialchars($info['city']); ?>",
+        "sex": "<?php  echo htmlspecialchars($info['sex']); ?>",
+        "subscriber_status": true,
+    };
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.setEmail !== "undefined") {
+            _ra.setEmail(_ra.setEmailInfo);
+        }
+    }
+    <?php Mage::getSingleton('core/session')->unsTriggerSetEmail(); ?>
+    <?php endif ?>
+    <?php
+    /*
+        ----------------------- Trigger sendCategory -----------------------
+    */
+    ?>
+    <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "category") : ?>
+
+    // Trigger sendCategory
+
+    <?php $_category = Mage::registry('current_category'); ?>
+    <?php
+    $_categoryParent = "false";
+    $_categoryBreadcrumb = "[]";
+    if ($_category->getLevel() > 2) {
+        $_categoryParent = '"' . $_category->getParentId() . '"';
+        $_categoryBreadcrumb = array();
+        $breadcrumbCategory = $_category;
+        while ($breadcrumbCategory->getLevel() > 2) {
+            $breadcrumbCategory = Mage::getModel('catalog/category')->load($breadcrumbCategory->getParentId());
+
+            $_categoryBreadcrumb[] = '{
+                    "id": "' . $breadcrumbCategory->getId() . '",
+                    "name": "' . htmlspecialchars($breadcrumbCategory->getName()) . '",
+                    "parent": ' . ($breadcrumbCategory->getLevel() > 2 ? '"' . $breadcrumbCategory->getParentId() . '"' : 'false') . '
+                }';
+        }
+        $_categoryBreadcrumb = '[' . implode(', ', $_categoryBreadcrumb) . ']';
+    }
+    ?>
+
+    var _ra = _ra || {};
+    _ra.sendCategoryInfo = {
+        "id": "<?php echo $_category->getId(); ?>",
+        "name": "<?php echo htmlspecialchars($_category->getName()); ?>",
+        "parent": <?php echo $_categoryParent; ?>,
+        "breadcrumb": <?php echo $_categoryBreadcrumb; ?>
+    };
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.sendCategory !== "undefined") {
+            _ra.sendCategory(_ra.sendCategoryInfo);
+        }
+    }
+
+    <?php endif ?>
+    <?php
+    /*
+        ----------------------- Trigger sendBrand -----------------------
+        magento doesn't have core support for brands..
+    */
+    ?>
+    <?php
+    /*
+        ----------------------- Trigger sendProduct -----------------------
+    */
+    ?>
+    <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
+
+    // Trigger sendProduct
+
+    <?php $_product = Mage::registry('current_product'); ?>
+
+    <?php if ($_product) : ?>
+    <?php
+    $_productUrl = Mage::helper('core/url')->getCurrentUrl();
+
+    $_category = false;
+    if (Mage::registry('current_category')) {
+        $_category = Mage::registry('current_category');
+    } else {
+        $_productCategoryIds = $_product->getCategoryIds();
+        if (count($_productCategoryIds)) {
+            $firstCategoryId = $_productCategoryIds[0];
+            $_category = Mage::getModel('catalog/category')->load($firstCategoryId);
+        }
+    }
+
+    $_categoryParent = "false";
+    $_categoryBreadcrumb = "[]";
+
+    if ($_category) {
+        if ($_category->getLevel() > 2) {
+            $_categoryParent = '"' . $_category->getParentId() . '"';
+            $_categoryBreadcrumb = array();
+            $breadcrumbCategory = $_category;
+            while ($breadcrumbCategory->getLevel() > 2) {
+                $breadcrumbCategory = Mage::getModel('catalog/category')->load($breadcrumbCategory->getParentId());
+                $_categoryBreadcrumb[] = '{
+                        "id": "' . $breadcrumbCategory->getId() . '",
+                        "name": "' . htmlspecialchars($breadcrumbCategory->getName()) . '",
+                        "parent": ' . ($breadcrumbCategory->getLevel() > 2 ? '"' . $breadcrumbCategory->getParentId() . '"' : 'false') . '
+                    }';
+            }
+            $_categoryBreadcrumb = '[' . implode(', ', $_categoryBreadcrumb) . ']';
+        }
+        $_category = '[{
+                "id": "' . $_category->getId() . '",
+                "name": "' . htmlspecialchars($_category->getName()) . '",
+                "parent": ' . $_categoryParent . ',
+                "breadcrumb" : ' . $_categoryBreadcrumb . '}]';
+    } else {
+        $_category = '[{
+                "id": "-1",
+                "name": "no category",
+                "parent": false
+            }]';
+    }
+    ?>
+    <?php
+    $productPrices = Mage::helper('retargeting_tracker')->preparePrice($_product);
+    $_pstock = Mage::helper('retargeting_tracker')->checkStock($_product);
+
+    ?>
+    var _ra = _ra || {};
+    _ra.sendProductInfo = {
+        "id": "<?php echo $_product->getId(); ?>",
+        "name": "<?php echo htmlspecialchars($_product->getName()); ?>",
+        "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
+        "img": "<?php echo htmlspecialchars(
+            Mage::helper('retargeting_tracker')->prepareImg($_product)
+        ); ?>",
+        "price": <?php echo $productPrices['price']; ?>,
+        "promo": <?php echo $productPrices['promo']; ?>,
+        "inventory": {
+            "variations": false,
+            "stock": <?php echo $_product->getIsInStock() ?>
+        },
+        "brand": false,
+        "category": <?php echo $_category; ?>
+    };
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.sendProduct !== "undefined") {
+            _ra.sendProduct(_ra.sendProductInfo);
+        }
+    }
+    
+    window.addEventListener("load", function(){
+        _ra.addToCartInfo = {
+            "product_id": "<?php echo $_product->getId(); ?>",
+            "quantity": 1,
+            "variation": false
+        };
+
+        /* document.querySelector(".btn-cart") document.getElementsByClassName("btn-cart")[0]*/
+        document.querySelector("<?php echo $add_to_cart_id; ?>")
+            .addEventListener("click", function(){
+            _ra.addToCartInfo.quantity = ( document.querySelector("#qty") ?? { value:1 } ).value;
+            
+            _ra.addToCart(_ra.addToCartInfo.product_id, _ra.addToCartInfo.quantity, _ra.addToCartInfo.variation);
+        });
+    });
+    <?php endif ?>
+    <?php endif ?>
+    <?php /* === Remove From Cart === */ ?>
+    <?php if($info = Mage::getSingleton('core/session')->getTriggerRemoveFromCart()) : ?>
+    var _ra = _ra || {};
+    _ra.removeFromCartInfo = <?php echo $info; ?>;
+    if (_ra.ready !== undefined) {
+        _ra.removeFromCart(_ra.removeFromCartInfo.product_id, _ra.removeFromCartInfo.quantity, _ra.removeFromCartInfo.variation);
+    }
+    <?php Mage::getSingleton('core/session')->unsTriggerRemoveFromCart(); ?>
+    <?php endif; ?>
+    <?php /* === Remove From Cart === */ ?>
+
+
+    <?php
+    /*
+        ----------------------- Trigger addToCart -----------------------
+    */
+    ?>
+    <?php if (true === false && $info = Mage::getSingleton('core/session')->getTriggerAddToCart()) : ?>
+
+    // Trigger addToCart
+
+    <?php
+
+    $referral = Mage::getSingleton('core/session')->getReferralController();
+    echo "/*" . $referral . "*/"; ?>
+
+    <?php if ($referral != "product") : ?>
+
+    // Trigger sendProduct before addToCart
+
+    <?php
+    $_product = Mage::getModel('catalog/product')->load($info['product_id']);
+    $_productUrl = $_product->getProductUrl();
+    $_category = false;
+
+    $_productCategoryIds = $_product->getCategoryIds();
+    if (count($_productCategoryIds)) {
+        $firstCategoryId = $_productCategoryIds[0];
+        $_category = Mage::getModel('catalog/category')->load($firstCategoryId);
+    }
+
+    $_categoryParent = "false";
+    $_categoryBreadcrumb = "[]";
+
+    if ($_category) {
+        if ($_category->getLevel() > 2) {
+            $_categoryParent = '"' . $_category->getParentId() . '"';
+            $_categoryBreadcrumb = array();
+            $breadcrumbCategory = $_category;
+            while ($breadcrumbCategory->getLevel() > 2) {
+                $breadcrumbCategory = Mage::getModel('catalog/category')->load($breadcrumbCategory->getParentId());
+
+                $_categoryBreadcrumb[] = '{
+                        "id": "' . $breadcrumbCategory->getId() . '",
+                        "name": "' . htmlspecialchars($breadcrumbCategory->getName()) . '",
+                        "parent": ' . ($breadcrumbCategory->getLevel() > 2 ? '"' . $breadcrumbCategory->getParentId() . '"' : 'false') . '
+                    }';
+            }
+            $_categoryBreadcrumb = '[' . implode(', ', $_categoryBreadcrumb) . ']';
+        }
+        $_category = '[{
+                "id": "' . $_category->getId() . '",
+                "name": "' . htmlspecialchars($_category->getName()) . '",
+                "parent": ' . $_categoryParent . ',
+                "breadcrumb" : ' . $_categoryBreadcrumb . '}]';
+    } else {
+        $_category = '[{"id": "-1", "name": "no category", "parent": false}]';
+    }
+    ?>
+    <?php
+    $productPrices = Mage::helper('retargeting_tracker')->preparePrice($_product);
+    ?>
+    var _ra = _ra || {};
+    _ra.sendProductInfo = {
+        "id": "<?php echo $_product->getId(); ?>",
+        "name": "<?php echo htmlspecialchars($_product->getName()); ?>",
+        "url": "<?php echo htmlspecialchars(strtok($_productUrl, '?')); ?>",
+        "img": "<?php echo htmlspecialchars(
+            Mage::helper('retargeting_tracker')->prepareImg($_product)
+        ); ?>",
+        "price": <?php echo $productPrices['price']; ?>,
+        "promo": <?php echo $productPrices['promo']; ?>,
+        "inventory": {
+            "variations": false,
+            "stock": <?php echo $_product->getIsInStock() ?>
+        },
+        "brand": false,
+        "category": <?php echo $_category; ?>
+    };
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.sendProduct !== "undefined") {
+            _ra.sendProduct(_ra.sendProductInfo);
+        }
+    }
+
+    var _ra = _ra || {};
+    _ra.addToCartInfo = {
+        "product_id": "<?php echo $info['product_id']; ?>",
+        "quantity": <?php echo $_product->getIsInStock() ?>,
+        "variation": <?php echo $info['variation']; ?>
+    };
+    if (typeof _ra.addToCart !== "undefined") {
+        _ra.addToCart(_ra.addToCartInfo.product_id, _ra.addToCartInfo.quantity, _ra.addToCartInfo.variation);
+    }
+
+    <?php else : ?>
+
+    var _ra = _ra || {};
+    _ra.addToCartInfo = {
+        "product_id": "<?php echo $info['product_id']; ?>",
+        "quantity": 1,
+        "variation": <?php echo $info['variation']; ?>
+    };
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.addToCart !== "undefined") {
+            _ra.addToCart(_ra.addToCartInfo.product_id, _ra.addToCartInfo.quantity, _ra.addToCartInfo.variation);
+        }
+    }
+
+    <?php endif ?>
+
+    <?php Mage::getSingleton('core/session')->unsTriggerAddToCart(); ?>
+    <?php endif ?>
+    <?php
+    /*
+        ----------------------- Trigger setVariation -----------------------
+    */
+    if ($magentoVersion > "1.4.2.0") :
+    ?>
+    <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
+
+    // Trigger setVariation
+
+    <?php $_product = Mage::registry('current_product'); ?>
+    <?php if ($_product) : ?>
+
+    <?php if (!$_product->isConfigurable()) : ?>
+    <?php /*is not configurable*/ ?>
+    <?php if ($_product->getTypeInstance(true)->hasOptions($_product)) : ?>
+
+    function _ra_triggerSetVariation() {
+        var _ra_variation = _ra_grabVariation();
+        if (typeof _ra.setVariation !== "undefined") {
+            _ra.setVariation("<?php echo $_product->getId(); ?>", _ra_variation);
+        }
+    }
+
+    _ra_optElfunc = [];
+
+    function _ra_grabVariation() {
+        var _ra_vo = {};
+        var _ra_voCode = [];
+        var _ra_voDetails = {};
+        <?php foreach ($_product->getOptions() as $o) : ?>
+        <?php $optionType = $o->getType(); ?>
+        <?php $optionId = $o->getId(); ?>
+        <?php $optionTitle = $o->getTitle(); ?>
+
+        <?php if ($optionType == "area") : ?>
+        if (document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']") !== null) {
+            _ra_voCode.push(document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']").value);
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "field") : ?>
+        if (document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']") !== null) {
+            _ra_voCode.push(document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']").value);
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "checkbox") : ?>
+        if (document.querySelectorAll("input[type='checkbox'].product-custom-option[name='options[<?php echo $optionId; ?>][]']").length > 0) {
+            var _ra_optionValue = [];
+            var _ra_arr = document.querySelectorAll("input[type='checkbox'].product-custom-option[name='options[<?php echo $optionId; ?>][]']");
+            for (var index = 0; index < _ra_arr.length; index++) {
+                if (_ra_arr[index].checked) {
+                    _ra_optionValue.push(document.querySelector("label[for='" + _ra_arr[index].getAttribute('id') + "']").innerText);
+                }
+            }
+            _ra_voCode.push(_ra_optionValue.join(', '));
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "date") : ?>
+        if (document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']") !== null) {
+            var _ra_optionValue = [];
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']").selectedIndex].text);
+            _ra_voCode.push(_ra_optionValue.join('/'));
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "date_time") : ?>
+        if (document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']") !== null) {
+            var _ra_optionValue = [];
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']").selectedIndex].text);
+            _ra_voCode.push(_ra_optionValue.join('/'));
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "drop_down") : ?>
+        if (document.querySelector("select.product-custom-option[name='options[<?php echo $optionId; ?>]']").value !== null) {
+            _ra_voCode.push(document.querySelector("select.product-custom-option[name='options[<?php echo $optionId; ?>]']").options[document.querySelector("select.product-custom-option[name='options[<?php echo $optionId; ?>]']").selectedIndex].text);
+        }
+        <?php endif ?>
+        <?php if ($optionType == "multiple") : ?>
+        if (document.querySelector("select.multiselect.product-custom-option[name='options[<?php echo $optionId; ?>][]']") !== null) {
+            var _ra_optionValue = [];
+            var _ra_arr = document.querySelector("select.multiselect.product-custom-option[name='options[<?php echo $optionId; ?>][]']").options;
+            for (var index = 0; index < _ra_arr.length; index++) {
+                if (_ra_arr[index].selected) {
+                    _ra_optionValue.push(_ra_arr[index].text);
+                }
+            }
+            _ra_voCode.push(_ra_optionValue.join('_'));
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "radio") : ?>
+        if (document.querySelectorAll("input[type='radio'].product-custom-option[name='options[<?php echo $optionId; ?>]']").length > 0) {
+            var _ra_optionValue = [];
+            var _ra_arr = document.querySelectorAll("input[type='radio'].product-custom-option[name='options[<?php echo $optionId; ?>]']");
+            for (var index = 0; index < _ra_arr.length; index++) {
+                if (_ra_arr[index].checked) {
+                    _ra_optionValue.push(document.querySelector("label[for='" + _ra_arr[index].getAttribute('id') + "']").innerText);
+                }
+            }
+            _ra_voCode.push(_ra_optionValue.join(', '));
+        }
+        <?php endif ?>
+        <?php if ($optionType == "time") : ?>
+        if (document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']") !== null) {
+            var _ra_optionValue = [];
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']").selectedIndex].text);
+            _ra_optionValue.push(document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']").options[document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']").selectedIndex].text);
+            _ra_voCode.push(_ra_optionValue.join('/'));
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "file") : ?>
+        if (document.querySelector("input[type='file'].product-custom-option[name='options_<?php echo $optionId; ?>_file']") !== null) {
+            _ra_voCode.push(document.querySelector("input[type='file'].product-custom-option[name='options_<?php echo $optionId; ?>_file']").value.split(/(\\|\/)/g).pop());
+        }
+        <?php endif ?>
+
+        _ra_voDetails[_ra_voCode[_ra_voCode.length - 1].replace(RegExp("[- ]", 'g'), '')] = {
+            "category_name": "<?php echo $optionTitle; ?>",
+            "category": "<?php echo $optionTitle; ?>",
+            "value": _ra_voCode[_ra_voCode.length - 1]
+        };
+        _ra_voCode[_ra_voCode.length - 1] = _ra_voCode[_ra_voCode.length - 1].replace(RegExp("[- ]", 'g'), '');
+
+        <?php endforeach ?>
+
+        var _ra_vo = {
+            "code": _ra_voCode.join('-'),
+            "stock": 1,
+            "details": _ra_voDetails
+        };
+        return _ra_vo;
+    }
+
+    _ra_helper_addLoadEvent(function () {
+        <?php foreach ($_product->getOptions() as $o) : ?>
+        <?php $optionType = $o->getType(); ?>
+        <?php $optionId = $o->getId(); ?>
+
+        <?php if ($optionType == "area") : ?>
+        if (document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']") !== null) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']").onchange;
+            document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>] !== null) _ra_optElfunc[<?php echo $optionId; ?>]();
+                _ra_triggerSetVariation();
+            };
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "field") : ?>
+        if (document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']") !== null) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']").onchange;
+            document.querySelector(".product-custom-option[name='options[<?php echo $optionId; ?>]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>] !== null) _ra_optElfunc[<?php echo $optionId; ?>]();
+                _ra_triggerSetVariation();
+            };
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "checkbox") : ?>
+        if (document.querySelectorAll("input[type='checkbox'].product-custom-option[name='options[<?php echo $optionId; ?>][]']").length > 0) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = [];
+            for (var index = 0; index < document.querySelectorAll("input[type='checkbox'].product-custom-option[name='options[<?php echo $optionId; ?>][]']").length; index++) {
+                _ra_optElfunc[document.querySelectorAll("input[type='checkbox'].product-custom-option[name='options[<?php echo $optionId; ?>][]']")[index]] = document.querySelectorAll("input[type='checkbox'].product-custom-option[name='options[<?php echo $optionId; ?>][]']")[index].onclick;
+                document.querySelectorAll("input[type='checkbox'].product-custom-option[name='options[<?php echo $optionId; ?>][]']")[index].onclick = function () {
+                    if (_ra_optElfunc[this] !== null) {
+                        _ra_optElfunc[this]();
+                        _ra_triggerSetVariation();
+                    }
+                };
+            }
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "date") : ?>
+        if (document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']") !== null) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = [];
+            _ra_optElfunc[<?php echo $optionId; ?>][0] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][1] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][2] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']").onchange;
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][0] !== null) _ra_optElfunc[<?php echo $optionId; ?>][0]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][1] !== null) _ra_optElfunc[<?php echo $optionId; ?>][1]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][2] !== null) _ra_optElfunc[<?php echo $optionId; ?>][2]();
+                _ra_triggerSetVariation();
+            };
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "date_time") : ?>
+        if (document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']") !== null) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = [];
+            _ra_optElfunc[<?php echo $optionId; ?>][0] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][1] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][2] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][3] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][4] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][5] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']").onchange;
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][month]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][0] !== null) _ra_optElfunc[<?php echo $optionId; ?>][0]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][1] !== null) _ra_optElfunc[<?php echo $optionId; ?>][1]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][year]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][2] !== null) _ra_optElfunc[<?php echo $optionId; ?>][2]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][3] !== null) _ra_optElfunc[<?php echo $optionId; ?>][3]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][4] !== null) _ra_optElfunc[<?php echo $optionId; ?>][4]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][5] !== null) _ra_optElfunc[<?php echo $optionId; ?>][5]();
+                _ra_triggerSetVariation();
+            }
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "drop_down") : ?>
+        if (document.querySelector("select.product-custom-option[name='options[<?php echo $optionId; ?>]']") !== null) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = document.querySelector("select.product-custom-option[name='options[<?php echo $optionId; ?>]']").onchange;
+            document.querySelector("select.product-custom-option[name='options[<?php echo $optionId; ?>]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>] !== null) {
+                    _ra_optElfunc[<?php echo $optionId; ?>]();
+                    _ra_triggerSetVariation();
+                }
+            };
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "multiple") : ?>
+        if (document.querySelector("select.multiselect.product-custom-option[name='options[<?php echo $optionId; ?>][]']") !== null) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = document.querySelector("select.multiselect.product-custom-option[name='options[<?php echo $optionId; ?>][]']").onchange;
+            document.querySelector("select.multiselect.product-custom-option[name='options[<?php echo $optionId; ?>][]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>] !== null) _ra_optElfunc[<?php echo $optionId; ?>]();
+                _ra_triggerSetVariation();
+            };
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "radio") : ?>
+        if (document.querySelectorAll("input[type='radio'].product-custom-option[name='options[<?php echo $optionId; ?>]']").length > 0) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = [];
+            for (var index = 0; index < document.querySelectorAll("input[type='radio'].product-custom-option[name='options[<?php echo $optionId; ?>]']").length; index++) {
+                _ra_optElfunc[document.querySelectorAll("input[type='radio'].product-custom-option[name='options[<?php echo $optionId; ?>]']")[index]] = document.querySelectorAll("input[type='radio'].product-custom-option[name='options[<?php echo $optionId; ?>]']")[index].onclick;
+                document.querySelectorAll("input[type='radio'].product-custom-option[name='options[<?php echo $optionId; ?>]']")[index].onclick = function () {
+                    if (_ra_optElfunc[this] !== null) {
+                        _ra_optElfunc[this]();
+                    }
+                    _ra_triggerSetVariation();
+                };
+            }
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "time") : ?>
+        if (document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']") !== null && document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']") !== null) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = [];
+            _ra_optElfunc[<?php echo $optionId; ?>][0] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][1] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']").onchange;
+            _ra_optElfunc[<?php echo $optionId; ?>][2] = document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']").onchange;
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][hour]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][0] !== null) _ra_optElfunc[<?php echo $optionId; ?>][0]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][minute]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][1] !== null) _ra_optElfunc[<?php echo $optionId; ?>][1]();
+                _ra_triggerSetVariation();
+            };
+            document.querySelector(".datetime-picker.product-custom-option[name='options[<?php echo $optionId; ?>][day_part]']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>][2] !== null) _ra_optElfunc[<?php echo $optionId; ?>][2]();
+                _ra_triggerSetVariation();
+            };
+        }
+        <?php endif ?>
+
+        <?php if ($optionType == "file") : ?>
+        if (document.querySelector("input[type='file'].product-custom-option[name='options_<?php echo $optionId; ?>_file']") !== null) {
+            _ra_optElfunc[<?php echo $optionId; ?>] = document.querySelector("input[type='file'].product-custom-option[name='options_<?php echo $optionId; ?>_file']").onchange;
+            document.querySelector("input[type='file'].product-custom-option[name='options_<?php echo $optionId; ?>_file']").onchange = function () {
+                if (_ra_optElfunc[<?php echo $optionId; ?>] !== null) _ra_optElfunc[<?php echo $optionId; ?>]();
+                _ra_triggerSetVariation();
+            };
+        }
+        <?php endif ?>
+
+        <?php endforeach ?>
+    });
+    <?php endif ?>
+
+
+
+    <?php /*is not configurable*/ ?>
+    <?php else : ?>
+    <?php /*is configurable*/ ?>
+    /*configurable product..*/
+    <?php $_productAttributeOptions = $_product->getTypeInstance(true)->getConfigurableAttributesAsArray($_product); ?>
+    <?php if (count($_productAttributeOptions) > 0) : ?>
+
+    function _ra_triggerSetVariation() {
+        var _ra_variation = _ra_grabVariation();
+        if (typeof _ra.setVariation !== "undefined") {
+            _ra.setVariation("<?php echo $_product->getId(); ?>", _ra_variation);
+        }
+    }
+
+    _ra_optElfunc = [];
+
+    function _ra_grabVariation() {
+        var _ra_vo = {};
+        var _ra_voCode = [];
+        var _ra_voDetails = {};
+
+        <?php foreach ($_productAttributeOptions as $_productAttribute) : ?>
+        <?php $attributeId = $_productAttribute["attribute_id"]; ?>
+        <?php $attributeTitle = $_productAttribute["label"]; ?>
+        if (document.getElementById("attribute<?php echo $attributeId; ?>") !== null) {
+            _ra_voCode.push(document.getElementById("attribute<?php echo $attributeId; ?>").options[document.getElementById("attribute<?php echo $attributeId; ?>").selectedIndex].text);
+        }
+        _ra_voDetails[_ra_voCode[_ra_voCode.length - 1].replace(RegExp("[- ]", 'g'), '')] = {
+            "category_name": "<?php echo $attributeTitle; ?>",
+            "category": "<?php echo $attributeTitle; ?>",
+            "value": _ra_voCode[_ra_voCode.length - 1]
+        };
+        _ra_voCode[_ra_voCode.length - 1] = _ra_voCode[_ra_voCode.length - 1].replace(RegExp("[- ]", 'g'), '');
+        <?php endforeach ?>
+
+        var _ra_vo = {
+            "code": _ra_voCode.join('-'),
+            "stock": 1,
+            "details": _ra_voDetails
+        };
+
+        return _ra_vo;
+    }
+
+    _ra_helper_addLoadEvent(function () {
+        <?php foreach ($_productAttributeOptions as $_productAttribute) : ?>
+        <?php $attributeId = $_productAttribute["attribute_id"]; ?>
+        <?php $attributeTitle = $_productAttribute["label"]; ?>
+        if (document.getElementById("attribute<?php echo $attributeId; ?>") !== null) {
+            _ra_optElfunc[<?php echo $attributeId; ?>] = document.getElementById("attribute<?php echo $attributeId; ?>").onchange;
+            document.getElementById("attribute<?php echo $attributeId; ?>").onchange = function () {
+                if (_ra_optElfunc[<?php echo $attributeId; ?>] !== null) _ra_optElfunc[<?php echo $attributeId; ?>]();
+                _ra_triggerSetVariation();
+            };
+        }
+        <?php endforeach ?>
+    });
+
+    <?php endif ?>
+
+    <?php /*is configurable*/ ?>
+    <?php endif ?>
+
+
+    <?php endif ?>
+    <?php endif ?>
+    <?php                                                                                                         endif //magento version ?>
+
+
+    <?php
+    /*
+        ----------------------- Trigger addToWishlist -----------------------
+    */
+    ?>
+    <?php if ($info = Mage::getSingleton('core/session')->getTriggerAddToWishlist()) : ?>
+
+    // Trigger addToWishlist
+
+    <?php $referral = Mage::getSingleton('core/session')->getReferralController();
+    echo "/*" . $referral . "*/"; ?>
+    <?php if ($referral != "product") : ?>
+
+    // Trigger sendProduct before addToWishlist
+
+    <?php
+    $_product = Mage::getModel('catalog/product')->load($info['product_id']);
+    $_productUrl = $_product->getProductUrl();
+    $_category = false;
+
+    $_productCategoryIds = $_product->getCategoryIds();
+    if (count($_productCategoryIds)) {
+        $firstCategoryId = $_productCategoryIds[0];
+        $_category = Mage::getModel('catalog/category')->load($firstCategoryId);
+    }
+
+    $_categoryParent = "false";
+    $_categoryBreadcrumb = "[]";
+
+    if ($_category) {
+        if ($_category->getLevel() > 2) {
+            $_categoryParent = '"' . $_category->getParentId() . '"';
+            $_categoryBreadcrumb = array();
+            $breadcrumbCategory = $_category;
+            while ($breadcrumbCategory->getLevel() > 2) {
+                $breadcrumbCategory = Mage::getModel('catalog/category')->load($breadcrumbCategory->getParentId());
+
+                $_categoryBreadcrumb[] = '{
+                        "id": "' . $breadcrumbCategory->getId() . '",
+                        "name": "' . htmlspecialchars($breadcrumbCategory->getName()) . '",
+                        "parent": ' . ($breadcrumbCategory->getLevel() > 2 ? '"' . $breadcrumbCategory->getParentId() . '"' : 'false') . '
+                    }';
+            }
+            $_categoryBreadcrumb = '[' . implode(', ', $_categoryBreadcrumb) . ']';
+        }
+        $_category = '[{
+                "id": "' . $_category->getId() . '",
+                "name": "' . htmlspecialchars($_category->getName()) . '",
+                "parent": ' . $_categoryParent . ',
+                "breadcrumb" : ' . $_categoryBreadcrumb . '}]';
+    } else {
+        $_category = '[{"id": "-1", "name": "no category", "parent": false}]';
+    }
+    ?>
+
+    var _ra = _ra || {};
+    _ra.addToWishlistInfo = {
+        "product_id": "<?php echo $info['product_id']; ?>"
+    };
+    if (typeof _ra.addToWishlist !== "undefined") {
+        _ra.addToWishlist(_ra.addToWishlistInfo.product_id);
+    }
+
+    <?php else : ?>
+
+    var _ra = _ra || {};
+    _ra.addToWishlistInfo = {
+        "product_id": "<?php echo $info['product_id']; ?>"
+    };
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.addToWishlist !== "undefined") {
+            _ra.addToWishlist(_ra.addToWishlistInfo.product_id);
+        }
+    }
+
+    <?php endif ?>
+
+    <?php Mage::getSingleton('core/session')->unsTriggerAddToWishlist(); ?>
+    <?php endif ?>
+
+
+
+    <?php
+    /*
+        ----------------------- Trigger clickImage -----------------------
+    */
+    ?>
+    <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
+
+    // Trigger clickImage
+
+    <?php
+    $_product = Mage::registry('current_product');
+    if ($_product) :
+    ?>
+    <?php
+
+    $customClass = Mage::helper('retargeting_tracker')->getCustomClass();
+    if (Mage::helper('retargeting_tracker')->getCustomClass() != "") :
+    ?>
+
+    function _ra_triggerClickImage() {
+        if (typeof _ra.clickImage !== "undefined") {
+            _ra.clickImage("<?php echo $_product->getId(); ?>");
+        }
+    }
+
+    _ra_helper_addLoadEvent(function () {
+        if (document.getElementsByClassName("<?php echo $customClass ?>").length > 0) {
+            document.getElementsByClassName("<?php echo $customClass ?>")[0].onmouseover = _ra_triggerClickImage;
+        }
+    });
+    //custom css
+    <?php                                                                                                         else : ?>
+    function _ra_triggerClickImage() {
+        if (typeof _ra.clickImage !== "undefined") {
+            _ra.clickImage("<?php echo $_product->getId(); ?>");
+        }
+    }
+
+    _ra_helper_addLoadEvent(function () {
+        if (document.getElementsByClassName("zoomWindow").length > 0) {
+            document.getElementsByClassName("zoomWindow")[0].onmouseover = _ra_triggerClickImage;
+        }
+        if (document.getElementsByClassName("zoomLens").length > 0) {
+            document.getElementsByClassName("zoomLens")[0].onmouseover = _ra_triggerClickImage;
+        }
+        if (document.getElementsByClassName("MagicToolboxContainer").length > 0) {
+            document.getElementsByClassName("MagicZoomBigImageCont")[0].onmouseover = _ra_triggerClickImage;
+        }
+        if (document.getElementById("image") !== null) {
+            document.getElementById("image").onclick = _ra_triggerClickImage;
+        } else if (document.querySelector(".product-image img") !== null) {
+            var el = document.querySelector(".product-image img").onclick = _ra_triggerClickImage;
+        }
+    });
+    <?php endif //customcss?>
+    <?php                                                                                                         endif //endif product ?>
+    <?php endif ?>
+
+
+
+    <?php
+    /*
+        ----------------------- Trigger commentOnProduct -----------------------
+    */
+    ?>
+    <?php if ($info = Mage::getSingleton('core/session')->getTriggerCommentOnProduct()) : ?>
+
+    // Trigger commentOnProduct
+
+    var _ra = _ra || {};
+    _ra.commentOnProductInfo = {
+        "product_id": "<?php echo $info['product_id']; ?>"
+    };
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.commentOnProduct !== "undefined") {
+            _ra.commentOnProduct(_ra.commentOnProductInfo.product_id);
+        }
+    }
+
+    <?php Mage::getSingleton('core/session')->unsTriggerCommentOnProduct(); ?>
+    <?php endif ?>
+
+    <?php
+    /*
+        ----------------------- Trigger mouseOverAddToCart -----------------------
+    */
+    ?>
+    <?php if (Mage::app()->getFrontController()->getRequest()->getControllerName() == "product" && !is_null(Mage::registry('product'))) : ?>
+
+    // Trigger mouseOverAddToCart
+
+    <?php $_product = Mage::registry('current_product'); ?>
+    <?php if ($_product) : ?>
+    function _ra_triggerMouseOverAddToCart() {
+        if (typeof _ra.mouseOverAddToCart !== "undefined") {
+            _ra.mouseOverAddToCart("<?php echo $_product->getId(); ?>");
+        }
+    }
+
+    _ra_helper_addLoadEvent(function () {
+        if (document.getElementById("product-addtocart-button") !== null) {
+            document.getElementById("product-addtocart-button").onmouseover = _ra_triggerMouseOverAddToCart;
+        } else if (document.getElementsByClassName("btn-cart").length > 0) {
+            document.getElementsByClassName("btn-cart")[0].onmouseover = _ra_triggerMouseOverAddToCart;
+        }
+    });
+
+    <?php endif ?>
+    <?php endif ?>
+
+
+
+    <?php
+    /*
+        ----------------------- Trigger saveOrder -----------------------
+    */
+    ?>
+    <?php if ($info = Mage::getSingleton('core/session')->getTriggerSaveOrder()) : ?>
+    <?php
+    if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+        //Get customer's date of birth. If date of birth doesn't exist or is not set => NULL;
+        // Comments to be deleted
+        $birthday = Mage::getSingleton('customer/session')->getCustomer()->getDob();
+
+        if ($birthday === NULL) {
+            $formattedBirthday = '';
+        } else {
+            $formattedBirthday = date("d-m-Y", strtotime($birthday));
+        }
+    } else {
+        //If guest user => date of birth = 01-01-1970
+        $formattedBirthday = '';
+    }
+    ?>
+
+    // Trigger saveOrder
+
+    var _ra = _ra || {};
+    _ra.saveOrderInfo = {
+        "order_no": "<?php echo $info['order_no']; ?>",
+        "lastname": "<?php echo htmlspecialchars($info['lastname']); ?>",
+        "firstname": "<?php echo htmlspecialchars($info['firstname']); ?>",
+        "email": "<?php echo htmlspecialchars($info['email']); ?>",
+        "phone": "<?php echo htmlspecialchars($info['phone']); ?>",
+        "state": "<?php echo htmlspecialchars($info['state']); ?>",
+        "city": "<?php echo htmlspecialchars($info['city']); ?>",
+        "address": "<?php echo htmlspecialchars($info['address']); ?>",
+        "birthday": "<?php echo $formattedBirthday; ?>",
+        "discount": <?php echo $info['discount']; ?>,
+        "discount_code": "<?php echo $info['discount_code']; ?>",
+        "shipping": <?php echo $info['shipping']; ?>,
+        "total": <?php echo $info['total']; ?>//,
+    //  "subscriber_status": false
+    };
+    _ra.saveOrderProducts = <?php echo $info['products']; ?>
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.saveOrder !== "undefined") {
+            _ra.saveOrder(_ra.saveOrderInfo, _ra.saveOrderProducts);
+        }
+    }
+
+    <?php Mage::getSingleton('core/session')->unsTriggerSaveOrder(); ?>
+    <?php endif ?>
+
+
+
+    <?php
+    /*
+        ----------------------- Trigger visitHelpPage -----------------------
+    */
+    ?>
+    <?php if (Mage::app()->getFrontController()->getRequest()->getRouteName() == 'cms') : ?>
+
+    <?php
+    $page = Mage::getSingleton('cms/page');
+    $helpPages = Mage::getStoreConfig('retargetingtracker_options/more/help_pages');
+    $helpPages = explode(',', $helpPages);
+    ?>
+
+    <?php if ($page->getId() && in_array($page->getId(), $helpPages)) : ?>
+
+    // Trigger visitHelpPage
+
+    var _ra = _ra || {};
+    _ra.visitHelpPageInfo = {
+        "visit": true
+    }
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.visitHelpPage !== "undefined") {
+            _ra.visitHelpPage();
+        }
+    }
+
+    <?php endif ?>
+
+
+    <?php endif ?>
+
+
+
+    <?php
+    /*
+        ----------------------- Trigger checkoutIds -----------------------
+    */
+    ?>
+    <?php
+    $request = $this->getRequest();
+    $module = $request->getModuleName();
+    $controller = $request->getControllerName();
+    $action = $request->getActionName();
+    ?>
+    <?php
+    if (
+    ($module == 'checkout' && $controller == 'cart' && $action == 'index') ||
+    ($module == 'checkout' && $controller == 'onepage' && $action == 'index') ||
+    ($module == 'checkout/cart' && $controller = 'cart' && $action == 'index') ||
+    ($module == 'checkout/cart' && $controller = 'onepage' && $action == 'index') ||
+    (Mage::getURL('checkout/onepage') == Mage::helper('core/url')->getCurrentUrl()) ||
+    (strrpos(Mage::helper('core/url')->getCurrentUrl(), "/onestepcheckout") !== false)
+    ) : ?>
+
+    // Trigger checkoutIds
+
+    <?php
+    $items = Mage::getSingleton('checkout/session')->getQuote()->getAllItems();
+    $products = array();
+    foreach ($items as $item) {
+        $products[] = $item->getProductId();
+    }
+    $products = implode(", ", $products);
+    ?>
+
+    var _ra = _ra || {};
+    _ra.checkoutIdsInfo = [<?php echo $products; ?>];
+
+    if (_ra.ready !== undefined) {
+        if (typeof _ra.checkoutIds !== "undefined") {
+            _ra.checkoutIds(_ra.checkoutIdsInfo);
+        }
+    }
+
+    <?php                                                                                                         endif ?>
+
+
+    <?php // likeFacebook
+    $_product = Mage::registry('current_product');
+    if ($_product && Mage::helper('retargeting_tracker')->isFacebookAvailable()) :
+    ?>
+
+    if (typeof FB != "undefined") {
+        FB.Event.subscribe('edge.create', function () {
+            _ra.likeFacebook(<?php echo $_product->getId()?>);
+        });
+    }
+    <?php                                                                                                         endif; //end like facebook ?>
+
+</script>
+<?php
+/*
+    ----------------------- Track URL History --------------------------
+*/
+?>
+<?php
+Mage::getSingleton('core/session')->setReferralController(Mage::app()->getFrontController()->getRequest()->getControllerName());
+?>
