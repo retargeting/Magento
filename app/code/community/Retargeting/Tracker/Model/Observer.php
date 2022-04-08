@@ -74,33 +74,37 @@ class Retargeting_Tracker_Model_Observer
     }
 
     private function Subscriber($isSubscribed, $info) {
-        $apiURL = "https://api.retargeting.app/v1/" . ( $isSubscribed ? "subscriber-register" : "subscriber-unsubscribe" );
+        try {
+            $apiURL = "https://api.retargeting.app/v1/" . ( $isSubscribed ? "subscriber-register" : "subscriber-unsubscribe" );
 
-        $key = Mage::getStoreConfig('retargetingtracker_options/token/token');
+            $key = Mage::getStoreConfig('retargetingtracker_options/token/token');
 
-        if (empty($key)) {
+            if (empty($key)) {
+                return false;
+            }
+
+            $info['k'] = $key;
+
+            if (empty($info['phone'])){
+                unset($info['phone']);
+            }
+
+            $apiURL = $apiURL .'?'. http_build_query($info);
+
+            $curl_request = curl_init();
+            curl_setopt($curl_request, CURLOPT_CONNECTTIMEOUT, 1);
+            curl_setopt($curl_request, CURLOPT_TIMEOUT, 1);
+            curl_setopt($curl_request, CURLOPT_URL, $apiURL);
+            curl_setopt($curl_request, CURLOPT_POST, false);
+            // curl_setopt($curl_request, CURLOPT_POSTFIELDS, $api_parameters);
+            curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, false);
+            $out = curl_exec($curl_request);
+
+            return true;
+        } catch (\Exception $e) {
             return false;
         }
-
-        $info['k'] = $key;
-
-        if (empty($info['phone'])){
-            unset($info['phone']);
-        }
-
-        $apiURL = $apiURL .'?'. http_build_query($info);
-
-        $curl_request = curl_init();
-        curl_setopt($curl_request, CURLOPT_CONNECTTIMEOUT, 1);
-        curl_setopt($curl_request, CURLOPT_TIMEOUT, 1);
-        curl_setopt($curl_request, CURLOPT_URL, $apiURL);
-        curl_setopt($curl_request, CURLOPT_POST, false);
-        // curl_setopt($curl_request, CURLOPT_POSTFIELDS, $api_parameters);
-        curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, false);
-        $out = curl_exec($curl_request);
-
-        return true;
     }
 
     public function TrackSetEmail($observer)
@@ -365,13 +369,14 @@ class Retargeting_Tracker_Model_Observer
                 "total" => $order->getGrandTotal(),
                 "products" => json_encode($products)
             );
-
+            /*
             if ($token && $token != "") {
                 $retargetingClient = new Retargeting_REST_API_Client($token);
                 $retargetingClient->setResponseFormat("json");
                 $retargetingClient->setDecoding(false);
                 $response = $retargetingClient->order->save($info, $products);
             }
+            */
 
             Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
         }
