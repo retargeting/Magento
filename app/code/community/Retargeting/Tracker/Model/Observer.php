@@ -258,7 +258,7 @@ class Retargeting_Tracker_Model_Observer
     public function TrackSaveOrder($observer)
     {
         // $apiKey = Mage::getStoreConfig('retargetingtracker_options/domain/domain_api_key');
-        $token = Mage::getStoreConfig('retargetingtracker_options/token/token');
+        // $token = Mage::getStoreConfig('retargetingtracker_options/token/token');
 
         $magentoVersion = Mage::getVersion();
         if ($magentoVersion > "1.4.2.0") {
@@ -318,14 +318,14 @@ class Retargeting_Tracker_Model_Observer
                 "total" => $order->getGrandTotal(),
                 "products" => json_encode($products),
             );
-
+            /*
             if ($token && $token != "") {
                 $retargetingClient = new Retargeting_REST_API_Client($token);
                 $retargetingClient->setResponseFormat("json");
                 $retargetingClient->setDecoding(false);
                 $response = $retargetingClient->order->save($info, $products);
             }
-
+            */
             Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
         } else {
 
