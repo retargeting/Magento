@@ -22,17 +22,61 @@ class Retargeting_Tracker_Model_Observer
     private $isSubscribed = false;
     public function subscriberStatus($observer)
     {
+        $info = null;
+
         $model = $observer->getObject();
 
         if (!$model instanceof Mage_Newsletter_Model_Subscriber) {
             return;
         }
 
-        $customer = Mage::getSingleton('customer/session')->getCustomer();
+        $customer = $model;
 
-        $this->isSubscribed = $model->isSubscribed() == Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+        if ($customer->getEmail() === null) {
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+        }
 
-        $this->sendSubCustomer($customer);
+        $customer = Mage::getModel('newsletter/subscriber')->loadByEmail($customer->getEmail());
+
+        $cus = Mage::getModel('customer/customer')
+        ->setWebsiteId(Mage::app()->getWebsite()->getId())
+        ->loadByEmail($customer->getEmail());
+
+        $customerPhone = '';
+
+        $customerAddressId = $cus->getDefaultShipping();
+        if ($customerAddressId) {
+            $address = Mage::getModel('customer/address')->load($customerAddressId);
+
+            $customerData = $address->getData();
+            $customerPhone = $customerData['telephone'];
+        }
+        
+        $info = array(
+            "email" => $customer->getEmail(),
+            "name" => '',
+            "phone" => $customerPhone
+        );
+
+        if ($cus->getName() !== null && $cus->getName() !== ' ') {
+            $info["name"] = $cus->getName();
+        } else if ($cus->getFirstname() === null && $cus->getLastname() === null) {
+            $info["name"] = explode("@",$customer->getEmail())[0];
+        } else if ($cus->getFirstname() !== null && $cus->getLastname() !== null) {
+            $info["name"] = $cus->getFirstname().' '.$cus->getLastname();
+        } else if ($cus->getFirstname() !== null) {
+            $info["name"] = $cus->getFirstname();
+        } else  if ($cus->getLastname() !== null) {
+            $info["name"] = $cus->getLastname();
+        } else {
+            $info["name"] = explode("@",$customer->getEmail())[0];
+        }
+        //var_dump($cus->getFirstname(),empty($cus->getName()));
+
+        $this->isSubscribed = $customer->getStatus() == Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+        //var_dump($info);
+        //die();
+        $this->sendSubCustomer($customer, $info);
     }
 
     public function TrackRegister($observer) {
@@ -257,25 +301,26 @@ class Retargeting_Tracker_Model_Observer
 
     public function TrackSaveOrder($observer)
     {
-        // $apiKey = Mage::getStoreConfig('retargetingtracker_options/domain/domain_api_key');
-        // $token = Mage::getStoreConfig('retargetingtracker_options/token/token');
-
         $magentoVersion = Mage::getVersion();
+        $order = $observer->getOrder();
+
         if ($magentoVersion > "1.4.2.0") {
-            $helper = Mage::helper('catalog/product_configuration');
-
-            $event = $observer->getEvent();  //Fetches the current event
-            $order = $observer->getOrder();
+            // $helper = Mage::helper('catalog/product_configuration');
             $billingAddress = $order->getbillingAddress();
-            $quote = $observer->getEvent()->getQuote();
+        } else {
+            // $helper = Mage::helper('catalog/product');
+            $billingAddress = $order->getBillingAddress();
+        }
 
-            $products = array();
-            foreach ($order->getAllVisibleItems() as $item) {
-                $itemOptions = $item->getProductOptions();
+        // $quote = $observer->getEvent()->getQuote();
+
+        $products = array();
+        foreach ($order->getAllVisibleItems() as $item) {
+            $itemOptions = $item->getProductOptions();
+            $product = Mage::getModel('catalog/product')->load($item->getProductId());
+            if ($magentoVersion > "1.4.2.0") {
                 $variationCode = false;
                 $optionsCode = array();
-
-                $product = Mage::getModel('catalog/product')->load($item->getProductId());
                 if ($product->isConfigurable()) {
                     $_optCode = str_replace(' ', '', $item->getSku());
                     $_optCode = str_replace('-', '', $_optCode);
@@ -293,92 +338,51 @@ class Retargeting_Tracker_Model_Observer
                 }
 
                 $variationCode = !empty($optionsCode) ? implode('-', $optionsCode): false;
-
-                $products[] = array(
-                    'id' => $item->getProductId(),
-                    'quantity' => $item->getQtyOrdered(),
-                    'price' => number_format(Mage::helper('tax')->getPrice($item, $item->getPrice()), 2, '.', ''),
-                    'variation_code' => $variationCode
-                );
+            } else {
+                $variationCode = false;
             }
-
-            $info = array(
-                "order_no" => $order->getIncrementId(),
-                "firstname" => $billingAddress->getFirstname(),
-                "lastname" => $billingAddress->getLastname(),
-                "email" => $billingAddress->getEmail(),
-                "phone" => $billingAddress->getTelephone(),
-                "state" => $billingAddress->getRegion(),
-                "city" => $billingAddress->getCity(),
-                "address" => implode(" ", $billingAddress->getStreet()),
-                "data" => $billingAddress->getData(),
-                "discount" => $order->getDiscountAmount(),
-                "discount_code" => $order->getCouponCode(),
-                "shipping" => $order->getShippingInclTax(),
-                "total" => $order->getGrandTotal(),
-                "products" => json_encode($products),
+            $products[] = array(
+                'id' => $item->getProductId(),
+                'quantity' => $item->getQtyOrdered(),
+                'price' => number_format(Mage::helper('tax')->getPrice($item, $item->getPrice()), 2, '.', ''),
+                'variation_code' => $variationCode
             );
-            /*
-            if ($token && $token != "") {
-                $retargetingClient = new Retargeting_REST_API_Client($token);
-                $retargetingClient->setResponseFormat("json");
-                $retargetingClient->setDecoding(false);
-                $response = $retargetingClient->order->save($info, $products);
-            }
-            */
-            Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
-        } else {
-
-            // Magento 1.4 compatibility
-            $helper = Mage::helper('catalog/product');
-
-            $event = $observer->getEvent();  //Fetches the current event
-            $order = $observer->getOrder();
-            $billingAddress = $order->getBillingAddress();
-            $quote = $observer->getEvent()->getQuote();
-
-            $products = array();
-            foreach ($order->getAllVisibleItems() as $item) {
-                $itemOptions = $item->getProductOptions();
-
-                $product = Mage::getModel('catalog/product')->load($item->getProductId());
-
-                $variationCode = "";
-
-                $products[] = array(
-                    'id' => $item->getProductId(),
-                    'quantity' => $item->getQtyOrdered(),
-                    'price' => number_format(Mage::helper('tax')->getPrice($item, $item->getPrice()), 2, '.', ''),
-                    'variation_code' => false
-                );
-            }
-
-            $info = array(
-                "order_no" => $order->getIncrementId(),
-                "firstname" => $billingAddress->getFirstname(),
-                "lastname" => $billingAddress->getLastname(),
-                "email" => $billingAddress->getEmail(),
-                "phone" => $billingAddress->getTelephone(),
-                "state" => $billingAddress->getRegion(),
-                "city" => $billingAddress->getCity(),
-                "address" => implode(" ", $billingAddress->getStreet()),
-                "data" => $billingAddress->getData(),
-                "discount" => $order->getDiscountAmount(),
-                "discount_code" => $order->getCouponCode(),
-                "shipping" => $order->getShippingInclTax(),
-                "total" => $order->getGrandTotal(),
-                "products" => json_encode($products)
-            );
-            /*
-            if ($token && $token != "") {
-                $retargetingClient = new Retargeting_REST_API_Client($token);
-                $retargetingClient->setResponseFormat("json");
-                $retargetingClient->setDecoding(false);
-                $response = $retargetingClient->order->save($info, $products);
-            }
-            */
-
-            Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
         }
+
+        $info = array(
+            "order_no" => $order->getIncrementId(),
+            "firstname" => $billingAddress->getFirstname(),
+            "lastname" => $billingAddress->getLastname(),
+            "email" => $billingAddress->getEmail(),
+            "phone" => $billingAddress->getTelephone(),
+            "state" => $billingAddress->getRegion(),
+            "city" => $billingAddress->getCity(),
+            "address" => implode(" ", $billingAddress->getStreet()),
+            "data" => $billingAddress->getData(),
+            "discount" => $order->getDiscountAmount(),
+            "discount_code" => $order->getCouponCode(),
+            "shipping" => $order->getShippingInclTax(),
+            "total" => $order->getGrandTotal(),
+            "products" => json_encode($products)
+        );
+
+        Mage::getSingleton('core/session')->setTriggerSaveOrder($info);
+
+        $customer = Mage::getModel('newsletter/subscriber')->loadByEmail($billingAddress->getEmail());
+
+        
+
+        $this->isSubscribed = $customer->getStatus() == Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+        
+        $customerPhone = $billingAddress->getTelephone();
+
+        $info = array (
+            "email" => $customer->getEmail(),
+            "name" => $billingAddress->getFirstname().' '.$billingAddress->getLastname(),
+            "phone" => $customerPhone,
+        );
+
+        $this->sendSubCustomer($customer, $info);
+        //die();
     }
 }
