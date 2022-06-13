@@ -204,9 +204,9 @@ $add_to_cart_id = Mage::helper('retargeting_tracker')->getConfig('retargetingtra
             "quantity": 1,
             "variation": false
         };
-
+        var BTNRTG = "<?php echo $add_to_cart_id; ?>";
         /* document.querySelector(".btn-cart") document.getElementsByClassName("btn-cart")[0]*/
-        document.querySelector("<?php echo $add_to_cart_id; ?>")
+        document.querySelector(BTNRTG === "" ? ".btn-cart" : BTNRTG)
             .addEventListener("click", function(){
             _ra.addToCartInfo.quantity = ( document.querySelector("#qty") ?? { value:1 } ).value;
             
