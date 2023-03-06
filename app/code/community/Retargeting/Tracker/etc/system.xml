@@ -17,7 +17,7 @@
     </tabs>
     <sections>
         <retargetingtracker_options translate="label" module="retargeting_tracker">
-            <label><![CDATA[<span style="padding:0 !important;margin-left:0px;padding-top:2.5px !important;"><img style="height:30px;padding:0px;vertical-align: middle;" src="https://retargeting.biz/favicon.png" alt="Retargeting"> Retargeting Tracker Options</span>]]></label>
+            <label><![CDATA[<span style="padding:0 !important;margin-left:0px;padding-top:2.5px !important;"><img style="height:30px;padding:0px;vertical-align: middle;" src="https://retargeting.biz/favicon.png" alt="Retargeting"> Retargeting Tracker</span>]]></label>
             <tab>retargetingconfig</tab>
             <frontend_type>text</frontend_type>
             <sort_order>1000</sort_order>
@@ -55,6 +55,16 @@ if (typeof rtgElm === "undefined") {
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
+                        <status>
+                            <label>Enable</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<a href="https://retargeting.app/">Click here</a> to get your Tracking API Key]]></comment>
+                        </status>
                         <domain_api_key>
                             <label>Tracking API Key</label>
                             <frontend_type>text</frontend_type>
@@ -223,9 +233,97 @@ window.addEventListener('load', function () {
                             <show_in_store>1</show_in_store>
                             <comment><![CDATA[Add Price Label ID or Class]]></comment>
                         </pricelabelid>
+                        <rec_status translate="label">
+                            <label>Recommendation Engine</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[<strong>If active, please add Div from RTG down below</strong>]]></comment>
+                        </rec_status>
                     </fields>
                 </more>
-
+                <!--
+                /* TODO: RecEngine */
+                -->
+                <rec_data translate="label">
+                    <label>Recommendation Engine</label>
+                    <sort_order>3</sort_order>
+                    <!--
+                    <backend_model>retargeting_tracker/addform</backend_model>
+                    <frontend_type>retargeting_tracker/addform</frontend_type>
+                    -->
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <home_page translate="label">
+                            <label><![CDATA[<strong>Home Page</strong>]]></label>
+                            <frontend_type>recengine</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>61</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </home_page>
+                        <category_page translate="label">
+                            <label><![CDATA[<strong>Category Page</strong>]]></label>
+                            <frontend_type>recengine</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>62</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </category_page>
+                        <product_page translate="label">
+                            <label><![CDATA[<strong>Product Page</strong>]]></label>
+                            <frontend_type>recengine</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>63</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </product_page>
+                        <shopping_cart translate="label">
+                            <label><![CDATA[<strong>Shopping Cart</strong>]]></label>
+                            <frontend_type>recengine</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>64</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </shopping_cart>
+                        <thank_you_page translate="label">
+                            <label><![CDATA[<strong>Thank you Page</strong>]]></label>
+                            <frontend_type>recengine</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>65</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </thank_you_page>
+                        <search_page translate="label">
+                            <label><![CDATA[<strong>Search Page</strong>]]></label>
+                            <frontend_type>recengine</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>66</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </search_page>
+                        <page_404 translate="label">
+                            <label><![CDATA[<strong>Page 404</strong>]]></label>
+                            <frontend_type>recengine</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>67</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </page_404>
+                    </fields>
+                </rec_data>
             </groups>
         </retargetingtracker_options>
     </sections>
